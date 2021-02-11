@@ -16,6 +16,3 @@ jobs:
     - name: Contentful Migration
       id: migrate
       uses: ./
-    - name: Get Branch
-      run: echo $(git branch -r --contains ${{ github.ref }})
-
