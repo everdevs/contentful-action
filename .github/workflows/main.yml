@@ -13,4 +13,4 @@ jobs:
 
     - name: Contentful Migration
       id: migrate
-      uses: everdevs/contentful-action
+      uses: ./
