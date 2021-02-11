@@ -19,7 +19,7 @@ async function run() {
 
     const getBranchName = () => {
       let { ref } = context
-
+      console.log(JSON.stringify(github.context, null, 8));
       if (github.context.eventName === 'pull_request') {
         const pullRequestPayload = github.context.payload
         core.info(`head : ${pullRequestPayload.pull_request.head}`)
@@ -35,182 +35,180 @@ async function run() {
         .replace(/\//g, '-')
     }
 
+    getBranchName();
+
     //
     // Configuration variables
-    //
-    const SPACE_ID = process.env.SPACE_ID;
-    const MANAGEMENT_API_KEY = process.env.MANAGEMENT_API_KEY;
+    //÷
 
-    const ENVIRONMENT_INPUT = getBranchName();
+    // const DEFAULT_MIGRATIONS_DIR = 'migrations';
+    // const MIGRATIONS_DIR = path.join(process.env.GITHUB_WORKSPACE, process.env.MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
 
-    const DEFAULT_MIGRATIONS_DIR = 'migrations';
-    const MIGRATIONS_DIR = path.join(process.env.GITHUB_WORKSPACE, process.env.MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
+    // const client = createClient({
+    //   accessToken: MANAGEMENT_API_KEY
+    // });
+    // const space = await client.getSpace(SPACE_ID);
 
-    const client = createClient({
-      accessToken: MANAGEMENT_API_KEY
-    });
-    const space = await client.getSpace(SPACE_ID);
+    // var ENVIRONMENT_ID = "";
 
-    var ENVIRONMENT_ID = "";
+    // let environment;
+    // console.log('Running with the following configuration');
+    // // ---------------------------------------------------------------------------
+    // if (ENVIRONMENT_INPUT == 'master'){
+    //   console.log(`Running on master.`);
+    //   ENVIRONMENT_ID = "master-".concat(getStringDate());
+    // }else{
+    //   console.log('Running on feature branch');
+    //   ENVIRONMENT_ID = "GH-".concat(ENVIRONMENT_INPUT);
+    // }
+    // console.log(`ENVIRONMENT_ID: ${ENVIRONMENT_ID}`);
 
-    let environment;
-    console.log('Running with the following configuration');
-    // ---------------------------------------------------------------------------
-    if (ENVIRONMENT_INPUT == 'master'){
-      console.log(`Running on master.`);
-      ENVIRONMENT_ID = "master-".concat(getStringDate());
-    }else{
-      console.log('Running on feature branch');
-      ENVIRONMENT_ID = "GH-".concat(ENVIRONMENT_INPUT);
-    }
-    console.log(`ENVIRONMENT_ID: ${ENVIRONMENT_ID}`);
+    // // ---------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------
+    // console.log(`Checking for existing versions of environment: ${ENVIRONMENT_ID}`);
 
-    console.log(`Checking for existing versions of environment: ${ENVIRONMENT_ID}`);
+    // try {
+    //   environment = await space.getEnvironment(ENVIRONMENT_ID);
+    //   if (ENVIRONMENT_ID != 'master'){
+    //     await environment.delete();
+    //     console.log('Environment deleted');
+    //   }
+    // } catch(e) {
+    //   console.log('Environment not found');
+    // }
 
-    try {
-      environment = await space.getEnvironment(ENVIRONMENT_ID);
-      if (ENVIRONMENT_ID != 'master'){
-        await environment.delete();
-        console.log('Environment deleted');
-      }
-    } catch(e) {
-      console.log('Environment not found');
-    }
+    // // ---------------------------------------------------------------------------
+    // if (ENVIRONMENT_ID != 'master'){
+    //   console.log(`Creating environment ${ENVIRONMENT_ID}`);
+    //   environment = await space.createEnvironmentWithId(ENVIRONMENT_ID, { name: ENVIRONMENT_ID });
+    // }
+    // // ---------------------------------------------------------------------------
+    // const DELAY = 3000;
+    // const MAX_NUMBER_OF_TRIES = 10;
+    // let count = 0;
 
-    // ---------------------------------------------------------------------------
-    if (ENVIRONMENT_ID != 'master'){
-      console.log(`Creating environment ${ENVIRONMENT_ID}`);
-      environment = await space.createEnvironmentWithId(ENVIRONMENT_ID, { name: ENVIRONMENT_ID });
-    }
-    // ---------------------------------------------------------------------------
-    const DELAY = 3000;
-    const MAX_NUMBER_OF_TRIES = 10;
-    let count = 0;
+    // console.log('Waiting for environment processing...')
 
-    console.log('Waiting for environment processing...')
+    // while (count < MAX_NUMBER_OF_TRIES) {
+    //   const status = (await space.getEnvironment(environment.sys.id)).sys.status.sys.id;
 
-    while (count < MAX_NUMBER_OF_TRIES) {
-      const status = (await space.getEnvironment(environment.sys.id)).sys.status.sys.id;
+    //   if (status === 'ready' || status === 'failed') {
+    //     if (status === 'ready') {
+    //       console.log(`Successfully processed new environment (${ENVIRONMENT_ID})`);
+    //     } else {
+    //       console.log('Environment creation failed');
+    //     }
+    //     break;
+    //   }
 
-      if (status === 'ready' || status === 'failed') {
-        if (status === 'ready') {
-          console.log(`Successfully processed new environment (${ENVIRONMENT_ID})`);
-        } else {
-          console.log('Environment creation failed');
-        }
-        break;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, DELAY));
-      count++;
-    }
+    //   await new Promise(resolve => setTimeout(resolve, DELAY));
+    //   count++;
+    // }
 
 
-    // ---------------------------------------------------------------------------
-    console.log('Update API Keys to allow access to new environment');
-    const newEnv = {
-      sys: {
-        type: 'Link',
-        linkType: 'Environment',
-        id: ENVIRONMENT_ID
-      }
-    }
+    // // ---------------------------------------------------------------------------
+    // console.log('Update API Keys to allow access to new environment');
+    // const newEnv = {
+    //   sys: {
+    //     type: 'Link',
+    //     linkType: 'Environment',
+    //     id: ENVIRONMENT_ID
+    //   }
+    // }
 
-    const {items: keys} = await space.getApiKeys();
-    await Promise.all(keys.map(key => {
-      console.log(`Updating - ${key.sys.id}`);
-      key.environments.push(newEnv);
-      return key.update();
-    }));
+    // const {items: keys} = await space.getApiKeys();
+    // await Promise.all(keys.map(key => {
+    //   console.log(`Updating - ${key.sys.id}`);
+    //   key.environments.push(newEnv);
+    //   return key.update();
+    // }));
 
-    // ---------------------------------------------------------------------------
-    console.log('Set default locale to new environment');
-    const defaultLocale = (await environment.getLocales()).items
-      .find(locale => locale.default).code;
+    // // ---------------------------------------------------------------------------
+    // console.log('Set default locale to new environment');
+    // const defaultLocale = (await environment.getLocales()).items
+    //   .find(locale => locale.default).code;
 
-    // ---------------------------------------------------------------------------
-    console.log('Read all the available migrations from the file system');
-    const availableMigrations = (await readdirAsync(MIGRATIONS_DIR))
-      .filter(file => /^\d+?\.js$/.test(file))
-        .map(file => getVersionOfFile(file))
-        .sort((a,b)=> a-b)
-        .map(num => `${num}`);
+    // // ---------------------------------------------------------------------------
+    // console.log('Read all the available migrations from the file system');
+    // const availableMigrations = (await readdirAsync(MIGRATIONS_DIR))
+    //   .filter(file => /^\d+?\.js$/.test(file))
+    //     .map(file => getVersionOfFile(file))
+    //     .sort((a,b)=> a-b)
+    //     .map(num => `${num}`);
 
-    // ---------------------------------------------------------------------------
-    console.log('Figure out latest ran migration of the contentful space');
-    const {items: versions} = await environment.getEntries({
-      content_type: 'versionTracking'
-    });
+    // // ---------------------------------------------------------------------------
+    // console.log('Figure out latest ran migration of the contentful space');
+    // const {items: versions} = await environment.getEntries({
+    //   content_type: 'versionTracking'
+    // });
 
-    if (!versions.length || versions.length > 1) {
-      throw new Error(
-        'There should only be one entry of type \'versionTracking\''
-      );
-    }
+    // if (!versions.length || versions.length > 1) {
+    //   throw new Error(
+    //     'There should only be one entry of type \'versionTracking\''
+    //   );
+    // }
 
-    let storedVersionEntry = versions[0];
-    const currentVersionString = storedVersionEntry.fields.version[defaultLocale];
+    // let storedVersionEntry = versions[0];
+    // const currentVersionString = storedVersionEntry.fields.version[defaultLocale];
 
-    // ---------------------------------------------------------------------------
-    console.log('Evaluate which migrations to run');
-    const currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
+    // // ---------------------------------------------------------------------------
+    // console.log('Evaluate which migrations to run');
+    // const currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
 
-    if (currentMigrationIndex === -1) {
-      throw new Error(
-        `Version ${currentVersionString} is not matching with any known migration`
-      );
-    }
-    const migrationsToRun = availableMigrations.slice(currentMigrationIndex + 1);
-    const migrationOptions = {
-      spaceId: SPACE_ID,
-      environmentId: ENVIRONMENT_ID,
-      accessToken: MANAGEMENT_API_KEY,
-      yes: true
-    };
+    // if (currentMigrationIndex === -1) {
+    //   throw new Error(
+    //     `Version ${currentVersionString} is not matching with any known migration`
+    //   );
+    // }
+    // const migrationsToRun = availableMigrations.slice(currentMigrationIndex + 1);
+    // const migrationOptions = {
+    //   spaceId: SPACE_ID,
+    //   environmentId: ENVIRONMENT_ID,
+    //   accessToken: MANAGEMENT_API_KEY,
+    //   yes: true
+    // };
 
-    // ---------------------------------------------------------------------------
-    console.log('Run migrations and update version entry');
-    while(migrationToRun = migrationsToRun.shift()) {
-      const filePath = path.join(MIGRATIONS_DIR, getFileOfVersion(migrationToRun));
-      console.log(`Running ${filePath}`);
-      await runMigration(Object.assign(migrationOptions, {
-        filePath
-      }));
-      console.log(`${migrationToRun} succeeded`);
+    // // ---------------------------------------------------------------------------
+    // console.log('Run migrations and update version entry');
+    // while(migrationToRun = migrationsToRun.shift()) {
+    //   const filePath = path.join(MIGRATIONS_DIR, getFileOfVersion(migrationToRun));
+    //   console.log(`Running ${filePath}`);
+    //   await runMigration(Object.assign(migrationOptions, {
+    //     filePath
+    //   }));
+    //   console.log(`${migrationToRun} succeeded`);
 
-      storedVersionEntry.fields.version[defaultLocale] = migrationToRun;
-      storedVersionEntry = await storedVersionEntry.update();
-      storedVersionEntry = await storedVersionEntry.publish();
+    //   storedVersionEntry.fields.version[defaultLocale] = migrationToRun;
+    //   storedVersionEntry = await storedVersionEntry.update();
+    //   storedVersionEntry = await storedVersionEntry.publish();
 
-      console.log(`Updated version entry to ${migrationToRun}`);
-    }
+    //   console.log(`Updated version entry to ${migrationToRun}`);
+    // }
 
-    // ---------------------------------------------------------------------------
-    console.log('Checking if we need to update master alias');
-    if (ENVIRONMENT_INPUT == 'master'){
-      console.log(`Running on master.`);
-      console.log(`Updating master alias.`);
-      await space.getEnvironmentAlias('master')
-        .then((alias) => {
-          alias.environment.sys.id = ENVIRONMENT_ID
-          return alias.update()
-        })
-        .then((alias) => console.log(`alias ${alias.sys.id} updated.`))
-        .catch(console.error);
-      console.log(`Master alias updated.`);
-    }else{
-      console.log('Running on feature branch');
-      console.log('No alias changes required');
-    }
+    // // ---------------------------------------------------------------------------
+    // console.log('Checking if we need to update master alias');
+    // if (ENVIRONMENT_INPUT == 'master'){
+    //   console.log(`Running on master.`);
+    //   console.log(`Updating master alias.`);
+    //   await space.getEnvironmentAlias('master')
+    //     .then((alias) => {
+    //       alias.environment.sys.id = ENVIRONMENT_ID
+    //       return alias.update()
+    //     })
+    //     .then((alias) => console.log(`alias ${alias.sys.id} updated.`))
+    //     .catch(console.error);
+    //   console.log(`Master alias updated.`);
+    // }else{
+    //   console.log('Running on feature branch');
+    //   console.log('No alias changes required');
+    // }
 
-    const environmentUrl = `https://app.contentful.com/spaces/${space.sys.id}/environments/${ENVIRONMENT_ID}`
-    const environmentName = ENVIRONMENT_ID
+    // const environmentUrl = `https://app.contentful.com/spaces/${space.sys.id}/environments/${ENVIRONMENT_ID}`
+    // const environmentName = ENVIRONMENT_ID
 
-    core.setOutput('environment_url', environmentUrl)
-    core.setOutput('environment_name', environmentName)
-    console.log('All done!!!');
+    // core.setOutput('environment_url', environmentUrl)
+    // core.setOutput('environment_name', environmentName)
+    // console.log('All done!!!');
   }
   catch (error) {
     core.setFailed(error.message);
