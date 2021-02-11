@@ -17,8 +17,5 @@ jobs:
       id: migrate
       uses: ./
     - name: Get Branch
-      run: |
-        raw=$(git branch -r --contains ${{ github.ref }})
-        branch=${raw##*/}
-        echo "BRANCH=$branch" >> $GITHUB_ENV
-    - run: echo ${{ env.BRANCH }}
+      run: echo $(git branch -r --contains ${{ github.ref }})
+
