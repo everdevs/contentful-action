@@ -1,6 +1,8 @@
 name: Contentful Migration Example
 
-on: [push]
+on:
+  pull_request:
+    types: [closed]
 
 jobs:
   build:
