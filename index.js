@@ -4,35 +4,35 @@ const github = require('@actions/github');
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const { context } = github
+    // const { context } = github
 
-    const {promisify} = require('util');
-    const {readdir} = require('fs');
-    const readdirAsync = promisify(readdir);
-    const path = require('path');
-    const { createClient } = require('contentful-management');
-    const {default: runMigration} = require('contentful-migration/built/bin/cli');
+    // const {promisify} = require('util');
+    // const {readdir} = require('fs');
+    // const readdirAsync = promisify(readdir);
+    // const path = require('path');
+    // const { createClient } = require('contentful-management');
+    // const {default: runMigration} = require('contentful-migration/built/bin/cli');
 
-    // utility fns
-    const getVersionOfFile = (file) => parseInt(file.replace('.js', '').replace(/_/g, '.'));
-    const getFileOfVersion = (version) => version.replace(/\./g, '_') + '.js';
+    // // utility fns
+    // const getVersionOfFile = (file) => parseInt(file.replace('.js', '').replace(/_/g, '.'));
+    // const getFileOfVersion = (version) => version.replace(/\./g, '_') + '.js';
 
     const getBranchName = () => {
-      let { ref } = context
+      // let { ref } = context
       console.log(JSON.stringify(github.context, null, 8));
-      if (github.context.eventName === 'pull_request') {
-        const pullRequestPayload = github.context.payload
-        core.info(`head : ${pullRequestPayload.pull_request.head}`)
+      // if (github.context.eventName === 'pull_request') {
+      //   const pullRequestPayload = github.context.payload
+      //   core.info(`head : ${pullRequestPayload.pull_request.head}`)
 
-        // actual branch name, not something like 'pull/111/merge'
-        ref = pullRequestPayload.pull_request.head.ref
-        core.info(`The head ref is: ${pullRequestPayload.pull_request.head.ref}`)
-      }
+      //   // actual branch name, not something like 'pull/111/merge'
+      //   ref = pullRequestPayload.pull_request.head.ref
+      //   core.info(`The head ref is: ${pullRequestPayload.pull_request.head.ref}`)
+      // }
 
-      return ref
-        .replace('refs/heads/', '')
-        // normalize git-flow branch names ie. feat/foo-feature -> feat-foo-feature
-        .replace(/\//g, '-')
+      // return ref
+      //   .replace('refs/heads/', '')
+      //   // normalize git-flow branch names ie. feat/foo-feature -> feat-foo-feature
+      //   .replace(/\//g, '-')
     }
 
     getBranchName();
