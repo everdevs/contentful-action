@@ -449,19 +449,33 @@ exports.issueCommand = issueCommand;
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
 
-const cleanBranchName = (branch) => branch.replace('refs/heads/', '').replace(/\//g, '-');
-const getBranchNames = () => {
-  const branches = {
-    head: process.env.GITHUB_HEAD_REF,
-    current: process.env.GITHUB_REF
+const branchNametoEnvironemntName = (branch) => branch.replace(/[\/_\.]/g, '-');
+
+const getBranchNames = (payload) => {
+  const {head: {ref: head}, base: {ref: base}} = payload.pull_request
+  return {
+    base,
+    head,
   }
-  console.log(JSON.stringify(github.context, null, 8));
-  console.log(branches);
 }
 
+const eventNames = {
+  pullRequest: 'pull_request',
+};
+
 (async () => {
-  getBranchNames();
-})()
+  const {eventName, payload} = github.context;
+  if (eventName === eventNames.pullRequest) {
+    console.log(`TYPE: ${eventNames.pullRequest}`);
+    const branchNames = getBranchNames(payload);
+    const environmentNames = {
+      base: branchNametoEnvironemntName(branchNames.base),
+      head: branchNametoEnvironemntName(branchNames.head),
+    }
+    console.log("branchNames:", branchNames);
+    console.log("environmentNames", environmentNames);
+  }
+})();
 
 
 /***/ }),
