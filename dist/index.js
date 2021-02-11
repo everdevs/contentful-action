@@ -467,9 +467,8 @@ async function run() {
 
     const getBranchName = () => {
       // let { ref } = context
-      console.log(process.env.GITHUB_REF);
-      console.log('========================');
-      console.log(JSON.stringify(process.env,null,8));
+      console.log("merged from:", process.env.GITHUB_HEAD_REF);
+      console.log("merged to:", process.env.GITHUB_REF);
       // console.log(JSON.stringify(github.context, null, 8));
       // if (github.context.eventName === 'pull_request') {
       //   const pullRequestPayload = github.context.payload
