@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [closed]
 
+
 jobs:
   build:
 
@@ -19,6 +20,5 @@ jobs:
     - name: Get Branch
       run: |
         raw=$(git branch -r --contains ${{ github.ref }})
-        branch=${raw##*/}
-        echo "BRANCH=$branch" >> $GITHUB_ENV
+        echo "BRANCH=$raw" >> $GITHUB_ENV
     - run: echo ${{ env.BRANCH }}
