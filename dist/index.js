@@ -467,7 +467,10 @@ async function run() {
 
     const getBranchName = () => {
       // let { ref } = context
-      console.log(JSON.stringify(github.context, null, 8));
+      console.log(env.GITHUB_REF);
+      console.log('========================');
+      console.log(JSON.stringify(env,null,8));
+      // console.log(JSON.stringify(github.context, null, 8));
       // if (github.context.eventName === 'pull_request') {
       //   const pullRequestPayload = github.context.payload
       //   core.info(`head : ${pullRequestPayload.pull_request.head}`)
