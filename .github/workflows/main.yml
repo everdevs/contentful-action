@@ -17,8 +17,8 @@ jobs:
       id: migrate
       uses: ./
     - name: Get Branch
-       run: |
-         raw=$(git branch -r --contains ${{ github.ref }})
-         branch=${raw/origin\/}
-         echo ::set-env name=BRANCH::$branch
-     - run: echo ===${{ env.BRANCH }}===
+      run: |
+        raw=$(git branch -r --contains ${{ github.ref }})
+        branch=${raw/origin\/}
+        echo ::set-env name=BRANCH::$branch
+    - run: echo ===${{ env.BRANCH }}===
