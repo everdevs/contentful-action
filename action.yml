@@ -1,5 +1,8 @@
 name: 'Contentful Migrations Action'
 description: 'Run a Migration against your Contentful space'
+inputs:
+  delete_after_merge:
+    description: 'Should the head branch be deleted after it was merged? (true|false)'
 outputs:
   environment_url:
     description: 'Contentful environment URL'
