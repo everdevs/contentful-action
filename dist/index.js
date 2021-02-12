@@ -14542,6 +14542,7 @@ var EventNames;
 })(EventNames || (EventNames = {}));
 
 // CONCATENATED MODULE: ./src/index.ts
+var src_a;
 
 
 
@@ -14569,23 +14570,20 @@ var Logger = {
 };
 
 var readdirAsync = Object(external_util_.promisify)(external_fs_.readdir);
-var src_a = process.env, SPACE_ID = src_a.SPACE_ID, MANAGEMENT_API_KEY = src_a.MANAGEMENT_API_KEY, GITHUB_WORKSPACE = src_a.GITHUB_WORKSPACE, src_b = src_a.VERSION_TRACKING, CONTENTFUL_VERSION_TRACKING = src_b === void 0 ? "versionTracking" : src_b, CUSTOM_MIGRATIONS_DIR = src_a.MIGRATIONS_DIR, INPUT_DELETE_AFTER_MERGE = src_a.INPUT_DELETE_AFTER_MERGE;
+var src_b = process.env, SPACE_ID = src_b.SPACE_ID, MANAGEMENT_API_KEY = src_b.MANAGEMENT_API_KEY, GITHUB_WORKSPACE = src_b.GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR = src_b.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = src_b.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = src_b.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = src_b.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = src_b.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = src_b.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = src_b.INPUT_VERSION_FIELD;
 var DEFAULT_MIGRATIONS_DIR = "migrations";
-var MIGRATIONS_DIR = external_path_default().join(GITHUB_WORKSPACE, CUSTOM_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
+var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
+var DEFAULT_FEATURE_PATTERN = "GH-[branch]";
+var DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
+var DEFAULT_VERSION_FIELD = "version";
+var VERSION_CONTENT_TYPE = INPUT_VERSION_CONTENT_TYPE || DEFAULT_VERSION_CONTENT_TYPE;
+var FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
+var MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
+var VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
+var MIGRATIONS_DIR = external_path_default().join(GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
 var CONTENTFUL_MASTER = "master";
 var DELAY = 3000;
 var MAX_NUMBER_OF_TRIES = 10;
-/**
- * Create a unified date string
- * YYYY-MM-DD-hhmm
- */
-var getStringDate = function () {
-    var date = new Date();
-    var hh = ("" + date.getUTCHours()).padStart(2, "0");
-    var mm = ("" + date.getUTCMinutes()).padStart(2, "0");
-    var YMD = ("" + date.toISOString()).substring(0, 10);
-    return YMD + "-" + hh + mm;
-};
 /**
  * Promise based delay
  * @param time
@@ -14612,10 +14610,51 @@ var versionToFilename = function (version) {
 };
 /**
  * Convert a branchName to a valid environmentName
- * @param branch
+ * @param branchName
  */
-var branchNameToEnvironmentName = function (branch) {
-    return branch.replace(/[\/_.]/g, "-");
+var branchNameToEnvironmentName = function (branchName) {
+    return branchName.replace(/[\/_.]/g, "-");
+};
+var Matcher;
+(function (Matcher) {
+    Matcher["YY"] = "YY";
+    Matcher["YYYY"] = "YYYY";
+    Matcher["MM"] = "MM";
+    Matcher["DD"] = "DD";
+    Matcher["hh"] = "hh";
+    Matcher["mm"] = "mm";
+    Matcher["ss"] = "ss";
+    Matcher["branch"] = "branch";
+})(Matcher || (Matcher = {}));
+var matchers = (src_a = {},
+    src_a[Matcher.ss] = function (date) { return ("" + date.getUTCSeconds()).padStart(2, "0"); },
+    src_a[Matcher.hh] = function (date) { return ("" + date.getUTCHours()).padStart(2, "0"); },
+    src_a[Matcher.mm] = function (date) { return ("" + date.getUTCMinutes()).padStart(2, "0"); },
+    src_a[Matcher.YYYY] = function (date) { return "" + date.getUTCFullYear(); },
+    src_a[Matcher.YY] = function (date) { return ("" + date.getUTCFullYear()).substr(2, 2); },
+    src_a[Matcher.MM] = function (date) { return ("" + (date.getUTCMonth() + 1)).padStart(2, "0"); },
+    src_a[Matcher.DD] = function (date) { return ("" + date.getDate()).padStart(2, "0"); },
+    src_a[Matcher.branch] = function (branchName) { return branchNameToEnvironmentName(branchName); },
+    src_a);
+var getNameFromPattern = function (pattern, _a) {
+    var _b = _a === void 0 ? {} : _a, branchName = _b.branchName;
+    var date = new Date();
+    return pattern.replace(/\[(YYYY|YY|MM|DD|hh|mm|ss|branch)]/g, function (substring, match) {
+        switch (match) {
+            case Matcher.branch:
+                return matchers[Matcher.branch](branchName);
+            case Matcher.YYYY:
+            case Matcher.YY:
+            case Matcher.MM:
+            case Matcher.DD:
+            case Matcher.hh:
+            case Matcher.mm:
+            case Matcher.ss:
+                return matchers[match](date);
+            default:
+                return substring;
+        }
+    });
 };
 /**
  * Get the branchNames based on the eventName
@@ -14660,9 +14699,11 @@ var getEnvironment = function (space, branchNames) { return Object(tslib.__await
                         ? branchNameToEnvironmentName(branchNames.headRef)
                         : null,
                 };
-                environmentId = environmentNames.base === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
-                    ? CONTENTFUL_MASTER + "-" + getStringDate()
-                    : "GH-" + environmentNames.head;
+                environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
+                    ? getNameFromPattern(MASTER_PATTERN)
+                    : getNameFromPattern(FEATURE_PATTERN, {
+                        branchName: branchNames.headRef,
+                    });
                 Logger.log("environmentId: \"" + environmentId + "\"");
                 if (!(environmentId === CONTENTFUL_MASTER)) return [3 /*break*/, 2];
                 _a = {
@@ -14773,20 +14814,20 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                     .map(function (num) { return "" + num; });
                 Logger.log("Find current version of the contentful space");
                 return [4 /*yield*/, environment.getEntries({
-                        content_type: CONTENTFUL_VERSION_TRACKING,
+                        content_type: VERSION_CONTENT_TYPE,
                     })];
             case 10:
                 versions = (_c.sent()).items;
                 // If there is no entry or more than one of CONTENTFUL_VERSION_TRACKING
                 // Then throw an Error and abort
                 if (versions.length === 0) {
-                    throw new Error("There should be exactly one entry of type \"" + CONTENTFUL_VERSION_TRACKING + "\"");
+                    throw new Error("There should be exactly one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
                 }
                 if (versions.length > 1) {
-                    throw new Error("There should only be one entry of type \"" + CONTENTFUL_VERSION_TRACKING + "\"");
+                    throw new Error("There should only be one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
                 }
                 storedVersionEntry = versions[0];
-                currentVersionString = storedVersionEntry.fields.version[defaultLocale];
+                currentVersionString = storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
                 Logger.log("Evaluate which migrations to run");
                 currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
                 // If the migration can't be found
@@ -14821,11 +14862,11 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 return [4 /*yield*/, mutableStoredVersionEntry.publish()];
             case 14:
                 mutableStoredVersionEntry = _c.sent();
-                Logger.success("Updated version entry to " + migrationToRun);
+                Logger.success("Updated field " + VERSION_FIELD + " in " + VERSION_CONTENT_TYPE + " entry to " + migrationToRun);
                 return [3 /*break*/, 11];
             case 15:
                 Logger.log("Checking if we need to update master alias");
-                if (!environmentId.startsWith(CONTENTFUL_MASTER)) return [3 /*break*/, 17];
+                if (!(environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS)) return [3 /*break*/, 17];
                 Logger.log("Running on master.");
                 Logger.log("Updating master alias.");
                 return [4 /*yield*/, space
@@ -14844,7 +14885,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 Logger.log("No alias changes required");
                 _c.label = 18;
             case 18:
-                if (!(INPUT_DELETE_AFTER_MERGE &&
+                if (!(INPUT_DELETE_FEATURE &&
                     branchNames.baseRef === branchNames.defaultBranch && ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged))) return [3 /*break*/, 23];
                 _c.label = 19;
             case 19:

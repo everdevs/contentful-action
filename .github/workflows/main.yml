@@ -19,7 +19,13 @@ jobs:
       id: migrate
       uses: ./
       with:
-        delete_after_merge: true
+        delete_feature: true
+        set_alias: false
+        master_pattern: "master-[YY]-[MM]-[DD]-[hh]-[mm]"
+        feature_pattern: "sandbox-[branch]"
+        version_field: version
+        version_content_type: versionTracking
+        migrations_dir: test-migrations
       env: # Set the secret as an input
         SPACE_ID: ${{ secrets.SPACE_ID }}
         MANAGEMENT_API_KEY: ${{ secrets.MANAGEMENT_API_KEY }}

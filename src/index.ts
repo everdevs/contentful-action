@@ -34,32 +34,34 @@ const {
   SPACE_ID,
   MANAGEMENT_API_KEY,
   GITHUB_WORKSPACE,
-  VERSION_TRACKING: CONTENTFUL_VERSION_TRACKING = "versionTracking",
-  MIGRATIONS_DIR: CUSTOM_MIGRATIONS_DIR,
-  INPUT_DELETE_AFTER_MERGE,
+  INPUT_MIGRATIONS_DIR,
+  INPUT_DELETE_FEATURE,
+  INPUT_SET_ALIAS,
+  INPUT_FEATURE_PATTERN,
+  INPUT_MASTER_PATTERN,
+  INPUT_VERSION_CONTENT_TYPE,
+  INPUT_VERSION_FIELD,
 } = process.env;
 
 const DEFAULT_MIGRATIONS_DIR = "migrations";
+const DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
+const DEFAULT_FEATURE_PATTERN = "GH-[branch]";
+const DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
+const DEFAULT_VERSION_FIELD = "version";
+
+const VERSION_CONTENT_TYPE =
+  INPUT_VERSION_CONTENT_TYPE || DEFAULT_VERSION_CONTENT_TYPE;
+const FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
+const MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
+const VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
 const MIGRATIONS_DIR = path.join(
   GITHUB_WORKSPACE,
-  CUSTOM_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR
+  INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR
 );
 
 const CONTENTFUL_MASTER = "master";
 const DELAY = 3000;
 const MAX_NUMBER_OF_TRIES = 10;
-
-/**
- * Create a unified date string
- * YYYY-MM-DD-hhmm
- */
-const getStringDate = () => {
-  const date = new Date();
-  const hh = `${date.getUTCHours()}`.padStart(2, "0");
-  const mm = `${date.getUTCMinutes()}`.padStart(2, "0");
-  const YMD = `${date.toISOString()}`.substring(0, 10);
-  return `${YMD}-${hh}${mm}`;
-};
 
 /**
  * Promise based delay
@@ -86,10 +88,61 @@ const versionToFilename = (version: string) =>
 
 /**
  * Convert a branchName to a valid environmentName
- * @param branch
+ * @param branchName
  */
-const branchNameToEnvironmentName = (branch: string) =>
-  branch.replace(/[\/_.]/g, "-");
+const branchNameToEnvironmentName = (branchName: string) =>
+  branchName.replace(/[\/_.]/g, "-");
+
+enum Matcher {
+  YY = "YY",
+  YYYY = "YYYY",
+  MM = "MM",
+  DD = "DD",
+  hh = "hh",
+  mm = "mm",
+  ss = "ss",
+  branch = "branch",
+}
+
+const matchers = {
+  [Matcher.ss]: (date) => `${date.getUTCSeconds()}`.padStart(2, "0"),
+  [Matcher.hh]: (date) => `${date.getUTCHours()}`.padStart(2, "0"),
+  [Matcher.mm]: (date) => `${date.getUTCMinutes()}`.padStart(2, "0"),
+  [Matcher.YYYY]: (date) => `${date.getUTCFullYear()}`,
+  [Matcher.YY]: (date) => `${date.getUTCFullYear()}`.substr(2, 2),
+  [Matcher.MM]: (date) => `${date.getUTCMonth() + 1}`.padStart(2, "0"),
+  [Matcher.DD]: (date) => `${date.getDate()}`.padStart(2, "0"),
+  [Matcher.branch]: (branchName) => branchNameToEnvironmentName(branchName),
+};
+
+interface NameToPatternArgs {
+  branchName?: string;
+}
+const getNameFromPattern = (
+  pattern: string,
+  { branchName }: NameToPatternArgs = {}
+) => {
+  const date = new Date();
+  return pattern.replace(
+    /\[(YYYY|YY|MM|DD|hh|mm|ss|branch)]/g,
+    (substring, match: Matcher) => {
+      switch (match) {
+        case Matcher.branch:
+          return matchers[Matcher.branch](branchName);
+        case Matcher.YYYY:
+        case Matcher.YY:
+        case Matcher.MM:
+        case Matcher.DD:
+        case Matcher.hh:
+        case Matcher.mm:
+        case Matcher.ss:
+          return matchers[match](date);
+        default:
+          return substring;
+      }
+    }
+  );
+};
 
 /**
  * Get the branchNames based on the eventName
@@ -137,10 +190,12 @@ const getEnvironment = async (
   // Then create a master environment name
   // Else prefix the branch with GH-*
   const environmentId =
-    environmentNames.base === branchNames.defaultBranch &&
+    branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged
-      ? `${CONTENTFUL_MASTER}-${getStringDate()}`
-      : `GH-${environmentNames.head}`;
+      ? getNameFromPattern(MASTER_PATTERN)
+      : getNameFromPattern(FEATURE_PATTERN, {
+          branchName: branchNames.headRef,
+        });
   Logger.log(`environmentId: "${environmentId}"`);
 
   // If environment is master
@@ -245,25 +300,26 @@ const runAction = async (space): Promise<void> => {
 
   Logger.log("Find current version of the contentful space");
   const { items: versions } = await environment.getEntries({
-    content_type: CONTENTFUL_VERSION_TRACKING,
+    content_type: VERSION_CONTENT_TYPE,
   });
 
   // If there is no entry or more than one of CONTENTFUL_VERSION_TRACKING
   // Then throw an Error and abort
   if (versions.length === 0) {
     throw new Error(
-      `There should be exactly one entry of type "${CONTENTFUL_VERSION_TRACKING}"`
+      `There should be exactly one entry of type "${VERSION_CONTENT_TYPE}"`
     );
   }
 
   if (versions.length > 1) {
     throw new Error(
-      `There should only be one entry of type "${CONTENTFUL_VERSION_TRACKING}"`
+      `There should only be one entry of type "${VERSION_CONTENT_TYPE}"`
     );
   }
 
   const [storedVersionEntry] = versions;
-  const currentVersionString = storedVersionEntry.fields.version[defaultLocale];
+  const currentVersionString =
+    storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
 
   Logger.log("Evaluate which migrations to run");
   const currentMigrationIndex = availableMigrations.indexOf(
@@ -307,14 +363,16 @@ const runAction = async (space): Promise<void> => {
     mutableStoredVersionEntry = await mutableStoredVersionEntry.update();
     mutableStoredVersionEntry = await mutableStoredVersionEntry.publish();
 
-    Logger.success(`Updated version entry to ${migrationToRun}`);
+    Logger.success(
+      `Updated field ${VERSION_FIELD} in ${VERSION_CONTENT_TYPE} entry to ${migrationToRun}`
+    );
   }
 
   Logger.log("Checking if we need to update master alias");
   // If the environmentId starts with "master"
   // Then set the alias to the new environment
   // Else inform the user
-  if (environmentId.startsWith(CONTENTFUL_MASTER)) {
+  if (environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS) {
     Logger.log(`Running on master.`);
     Logger.log(`Updating master alias.`);
     await space
@@ -335,7 +393,7 @@ const runAction = async (space): Promise<void> => {
   // And the Pull Request has been merged
   // Then delete the sandbox environment
   if (
-    INPUT_DELETE_AFTER_MERGE &&
+    INPUT_DELETE_FEATURE &&
     branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged
   ) {

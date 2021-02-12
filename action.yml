@@ -1,16 +1,28 @@
-name: 'Contentful Migrations Action'
-description: 'Run a Migration against your Contentful space'
+name: "Contentful Migration Automation"
+description: "Fully automated and configurable migrations against a contentful space"
 inputs:
-  delete_after_merge:
-    description: 'Should the head branch be deleted after it was merged? (true|false)'
+  delete_feature:
+    description: "Should the head branch be deleted after it was merged?"
+  set_alias:
+    description: "Should the master be aliased to the new master?"
+  master_pattern:
+    description: "The pattern that should be used for the new master"
+  feature_pattern:
+    description: "The pattern that should be used for the new feature"
+  version_content_type:
+    description: "The content-type that tracks the version"
+  version_field:
+    description: "The field that caries the version number"
+  migrations_dir:
+    description: "The directory to look for migrations"
 outputs:
   environment_url:
-    description: 'Contentful environment URL'
+    description: "Contentful environment URL"
   environment_name:
-    description: 'Contentful environment name'
+    description: "Contentful environment name"
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"
 branding:
-  icon: 'upload-cloud'
-  color: 'red'
+  icon: "upload-cloud"
+  color: "red"
