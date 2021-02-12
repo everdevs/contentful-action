@@ -5,7 +5,7 @@ import { readdir } from "fs";
 import path from "path";
 import { promisify } from "util";
 import {
-  CONTENTFUL_MASTER,
+  CONTENTFUL_ALIAS,
   INPUT_DELETE_FEATURE,
   INPUT_SET_ALIAS,
   MANAGEMENT_API_KEY,
@@ -163,15 +163,15 @@ export const runAction = async (space): Promise<void> => {
     );
   }
 
-  Logger.log("Checking if we need to update master alias");
-  // If the environmentId starts with "master"
+  Logger.log(`Checking if we need to update ${CONTENTFUL_ALIAS} alias`);
+  // If the environmentId starts with ${CONTENTFUL_ALIAS} ("master")
   // Then set the alias to the new environment
   // Else inform the user
-  if (environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS) {
-    Logger.log(`Running on master.`);
-    Logger.log(`Updating master alias.`);
+  if (environmentId.startsWith(CONTENTFUL_ALIAS) && INPUT_SET_ALIAS) {
+    Logger.log(`Running on ${CONTENTFUL_ALIAS}.`);
+    Logger.log(`Updating ${CONTENTFUL_ALIAS} alias.`);
     await space
-      .getEnvironmentAlias("master")
+      .getEnvironmentAlias(CONTENTFUL_ALIAS)
       .then((alias) => {
         alias.environment.sys.id = environmentId;
         return alias.update();

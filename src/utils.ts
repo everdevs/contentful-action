@@ -2,7 +2,7 @@ import * as github from "@actions/github";
 import chalk from "chalk";
 import { Space } from "contentful-management/dist/typings/entities/space";
 import {
-  CONTENTFUL_MASTER,
+  CONTENTFUL_ALIAS,
   DELAY,
   FEATURE_PATTERN,
   MASTER_PATTERN,
@@ -157,8 +157,8 @@ export const getEnvironment = async (
       : null,
   };
   // If the Pull Request is merged and the base is the repository default_name (master|main, ...)
-  // Then create a master environment name
-  // Else prefix the branch with GH-*
+  // Then create an environment name for the given master_pattern
+  // Else create an environment name for the given feature_pattern
   const environmentId =
     branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged
@@ -168,9 +168,9 @@ export const getEnvironment = async (
         });
   Logger.log(`environmentId: "${environmentId}"`);
 
-  // If environment is master
+  // If environment matches ${CONTENTFUL_ALIAS} ("master")
   // Then return it without further actions
-  if (environmentId === CONTENTFUL_MASTER) {
+  if (environmentId === CONTENTFUL_ALIAS) {
     return {
       environmentNames,
       environmentId,

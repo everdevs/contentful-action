@@ -29,6 +29,6 @@ export const MIGRATIONS_DIR = path.join(
   INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR
 );
 
-export const CONTENTFUL_MASTER = "master";
+export const CONTENTFUL_ALIAS = "master";
 export const DELAY = 3000;
 export const MAX_NUMBER_OF_TRIES = 10;
