@@ -1,0 +1,14 @@
+export declare const GITHUB_WORKSPACE: string, SPACE_ID: string, MANAGEMENT_API_KEY: string, INPUT_MIGRATIONS_DIR: string, INPUT_DELETE_FEATURE: string, INPUT_SET_ALIAS: string, INPUT_FEATURE_PATTERN: string, INPUT_MASTER_PATTERN: string, INPUT_VERSION_CONTENT_TYPE: string, INPUT_VERSION_FIELD: string;
+export declare const DEFAULT_MIGRATIONS_DIR = "migrations";
+export declare const DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
+export declare const DEFAULT_FEATURE_PATTERN = "GH-[branch]";
+export declare const DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
+export declare const DEFAULT_VERSION_FIELD = "version";
+export declare const VERSION_CONTENT_TYPE: string;
+export declare const FEATURE_PATTERN: string;
+export declare const MASTER_PATTERN: string;
+export declare const VERSION_FIELD: string;
+export declare const MIGRATIONS_DIR: string;
+export declare const CONTENTFUL_MASTER = "master";
+export declare const DELAY = 3000;
+export declare const MAX_NUMBER_OF_TRIES = 10;

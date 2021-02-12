@@ -26,9 +26,9 @@ jobs:
         version_field: version
         version_content_type: versionTracking
         migrations_dir: test-migrations
-      env: # Set the secret as an input
-        SPACE_ID: ${{ secrets.SPACE_ID }}
-        MANAGEMENT_API_KEY: ${{ secrets.MANAGEMENT_API_KEY }}
+        space_id: ${{ secrets.SPACE_ID }}
+        management_api_key: ${{ secrets.MANAGEMENT_API_KEY }}
+
 
     - name: Create commit comment
       uses: peter-evans/commit-comment@v1

@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(97);
+/******/ 		return __webpack_require__(689);
 /******/ 	};
 /******/ 	// initialize runtime
 /******/ 	runtime(__webpack_require__);
@@ -10896,7 +10896,7 @@ const Ref = __webpack_require__(953);
 
 const internals = {
     any: null,
-    date: __webpack_require__(847),
+    date: __webpack_require__(794),
     string: __webpack_require__(979),
     number: __webpack_require__(383),
     boolean: __webpack_require__(21),
@@ -11226,7 +11226,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var isFunction_1 = __webpack_require__(442);
-var Subscription_1 = __webpack_require__(856);
+var Subscription_1 = __webpack_require__(126);
 var Observer_1 = __webpack_require__(695);
 var rxSubscriber_1 = __webpack_require__(198);
 /**
@@ -14501,445 +14501,55 @@ Prompt.prototype.write = function (message) {
 
 /***/ }),
 /* 97 */
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
+var isFunction = __webpack_require__(10),
+    isMasked = __webpack_require__(159),
+    isObject = __webpack_require__(678),
+    toSource = __webpack_require__(473);
 
-// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
-var tslib = __webpack_require__(422);
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __webpack_require__(470);
-
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __webpack_require__(469);
-
-// EXTERNAL MODULE: ./node_modules/contentful-management/dist/contentful-management.node.js
-var contentful_management_node = __webpack_require__(311);
-
-// EXTERNAL MODULE: ./node_modules/contentful-migration/built/bin/cli.js
-var cli = __webpack_require__(315);
-
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __webpack_require__(747);
-
-// EXTERNAL MODULE: external "path"
-var external_path_ = __webpack_require__(622);
-var external_path_default = /*#__PURE__*/__webpack_require__.n(external_path_);
-
-// EXTERNAL MODULE: external "util"
-var external_util_ = __webpack_require__(669);
-
-// EXTERNAL MODULE: ./node_modules/chalk/source/index.js
-var source = __webpack_require__(843);
-var source_default = /*#__PURE__*/__webpack_require__.n(source);
-
-// CONCATENATED MODULE: ./src/types.ts
-var EventNames;
-(function (EventNames) {
-    EventNames["pullRequest"] = "pull_request";
-})(EventNames || (EventNames = {}));
-
-// CONCATENATED MODULE: ./src/index.ts
-var src_a;
-
-
-
-
-
-
-
-
-
-// Force colors on github
-source_default.a.level = 3;
-var Logger = {
-    log: function (message) {
-        console.log(source_default().white(message));
-    },
-    success: function (message) {
-        console.log("✅", source_default().green(message));
-    },
-    error: function (message) {
-        console.log("💩", source_default().red(message));
-    },
-    warn: function (message) {
-        console.log("⚠️", source_default().yellow(message));
-    },
-};
-
-var readdirAsync = Object(external_util_.promisify)(external_fs_.readdir);
-var src_b = process.env, SPACE_ID = src_b.SPACE_ID, MANAGEMENT_API_KEY = src_b.MANAGEMENT_API_KEY, GITHUB_WORKSPACE = src_b.GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR = src_b.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = src_b.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = src_b.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = src_b.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = src_b.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = src_b.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = src_b.INPUT_VERSION_FIELD;
-var DEFAULT_MIGRATIONS_DIR = "migrations";
-var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
-var DEFAULT_FEATURE_PATTERN = "GH-[branch]";
-var DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
-var DEFAULT_VERSION_FIELD = "version";
-var VERSION_CONTENT_TYPE = INPUT_VERSION_CONTENT_TYPE || DEFAULT_VERSION_CONTENT_TYPE;
-var FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
-var MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
-var VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
-var MIGRATIONS_DIR = external_path_default().join(GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
-var CONTENTFUL_MASTER = "master";
-var DELAY = 3000;
-var MAX_NUMBER_OF_TRIES = 10;
 /**
- * Promise based delay
- * @param time
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
  */
-var delay = function (time) {
-    if (time === void 0) { time = DELAY; }
-    return new Promise(function (resolve) { return setTimeout(resolve, time); });
-};
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+/** Used to detect host constructors (Safari). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype,
+    objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
 /**
- * Convert fileNames to integers
- * @example
- * filenameToVersion("1.js") // 1
- */
-var filenameToVersion = function (file) {
-    return parseInt(file.replace(/\.js$/, "").replace(/_/g, "."), 10);
-};
-/**
- * Convert integers to filenames
- * @example
- * versionToFilename(1) // 1.js
- */
-var versionToFilename = function (version) {
-    return version.replace(/\./g, "_") + ".js";
-};
-/**
- * Convert a branchName to a valid environmentName
- * @param branchName
- */
-var branchNameToEnvironmentName = function (branchName) {
-    return branchName.replace(/[\/_.]/g, "-");
-};
-var Matcher;
-(function (Matcher) {
-    Matcher["YY"] = "YY";
-    Matcher["YYYY"] = "YYYY";
-    Matcher["MM"] = "MM";
-    Matcher["DD"] = "DD";
-    Matcher["hh"] = "hh";
-    Matcher["mm"] = "mm";
-    Matcher["ss"] = "ss";
-    Matcher["branch"] = "branch";
-})(Matcher || (Matcher = {}));
-var matchers = (src_a = {},
-    src_a[Matcher.ss] = function (date) { return ("" + date.getUTCSeconds()).padStart(2, "0"); },
-    src_a[Matcher.hh] = function (date) { return ("" + date.getUTCHours()).padStart(2, "0"); },
-    src_a[Matcher.mm] = function (date) { return ("" + date.getUTCMinutes()).padStart(2, "0"); },
-    src_a[Matcher.YYYY] = function (date) { return "" + date.getUTCFullYear(); },
-    src_a[Matcher.YY] = function (date) { return ("" + date.getUTCFullYear()).substr(2, 2); },
-    src_a[Matcher.MM] = function (date) { return ("" + (date.getUTCMonth() + 1)).padStart(2, "0"); },
-    src_a[Matcher.DD] = function (date) { return ("" + date.getDate()).padStart(2, "0"); },
-    src_a[Matcher.branch] = function (branchName) { return branchNameToEnvironmentName(branchName); },
-    src_a);
-var getNameFromPattern = function (pattern, _a) {
-    var _b = _a === void 0 ? {} : _a, branchName = _b.branchName;
-    var date = new Date();
-    return pattern.replace(/\[(YYYY|YY|MM|DD|hh|mm|ss|branch)]/g, function (substring, match) {
-        switch (match) {
-            case Matcher.branch:
-                return matchers[Matcher.branch](branchName);
-            case Matcher.YYYY:
-            case Matcher.YY:
-            case Matcher.MM:
-            case Matcher.DD:
-            case Matcher.hh:
-            case Matcher.mm:
-            case Matcher.ss:
-                return matchers[match](date);
-            default:
-                return substring;
-        }
-    });
-};
-/**
- * Get the branchNames based on the eventName
- */
-var getBranchNames = function () {
-    var _a = github.context, eventName = _a.eventName, payload = _a.payload;
-    var defaultBranch = payload.repository.default_branch;
-    // Check the eventName
-    switch (eventName) {
-        // If pullRequest we need to get the head and base
-        case EventNames.pullRequest:
-            return {
-                baseRef: payload.pull_request.base.ref,
-                headRef: payload.pull_request.head.ref,
-                defaultBranch: defaultBranch,
-            };
-        // If not pullRequest we need work on the baseRef therefore head is null
-        default:
-            return {
-                headRef: null,
-                baseRef: payload.ref.replace(/^refs\/heads\//, ""),
-                defaultBranch: defaultBranch,
-            };
-    }
-};
-/**
- * Get the environment from a space
- * Checks if an environment already exists and then flushes it
- * @param space
- * @param branchNames
- */
-var getEnvironment = function (space, branchNames) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var environmentNames, environmentId, environment, e_1;
-    var _a, _b;
-    var _c;
-    return Object(tslib.__generator)(this, function (_d) {
-        switch (_d.label) {
-            case 0:
-                environmentNames = {
-                    base: branchNameToEnvironmentName(branchNames.baseRef),
-                    head: branchNames.headRef
-                        ? branchNameToEnvironmentName(branchNames.headRef)
-                        : null,
-                };
-                environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
-                    ? getNameFromPattern(MASTER_PATTERN)
-                    : getNameFromPattern(FEATURE_PATTERN, {
-                        branchName: branchNames.headRef,
-                    });
-                Logger.log("environmentId: \"" + environmentId + "\"");
-                if (!(environmentId === CONTENTFUL_MASTER)) return [3 /*break*/, 2];
-                _a = {
-                    environmentNames: environmentNames,
-                    environmentId: environmentId
-                };
-                return [4 /*yield*/, space.getEnvironment(environmentId)];
-            case 1: return [2 /*return*/, (_a.environment = _d.sent(),
-                    _a)];
-            case 2:
-                // Else we need to check for an existing environment and flush it
-                Logger.log("Checking for existing versions of environment: \"" + environmentId + "\"");
-                _d.label = 3;
-            case 3:
-                _d.trys.push([3, 6, , 7]);
-                return [4 /*yield*/, space.getEnvironment(environmentId)];
-            case 4:
-                environment = _d.sent();
-                return [4 /*yield*/, (environment === null || environment === void 0 ? void 0 : environment.delete())];
-            case 5:
-                _d.sent();
-                Logger.success("Environment deleted: \"" + environmentId + "\"");
-                return [3 /*break*/, 7];
-            case 6:
-                e_1 = _d.sent();
-                Logger.log("Environment not found: \"" + environmentId + "\"");
-                return [3 /*break*/, 7];
-            case 7:
-                Logger.log("Creating environment " + environmentId);
-                _b = {
-                    environmentNames: environmentNames,
-                    environmentId: environmentId
-                };
-                return [4 /*yield*/, space.createEnvironmentWithId(environmentId, {
-                        name: environmentId,
-                    })];
-            case 8: return [2 /*return*/, (_b.environment = _d.sent(),
-                    _b)];
-        }
-    });
-}); };
-/**
+ * The base implementation of `_.isNative` without bad shim checks.
  *
- * @param space
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function,
+ *  else `false`.
  */
-var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var branchNames, _a, environmentId, environment, environmentNames, count, status_1, newEnv, keys, defaultLocale, availableMigrations, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
-    var _b;
-    return Object(tslib.__generator)(this, function (_c) {
-        switch (_c.label) {
-            case 0:
-                branchNames = getBranchNames();
-                return [4 /*yield*/, getEnvironment(space, branchNames)];
-            case 1:
-                _a = _c.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentNames = _a.environmentNames;
-                count = 0;
-                Logger.log("Waiting for environment processing...");
-                _c.label = 2;
-            case 2:
-                if (!(count < MAX_NUMBER_OF_TRIES)) return [3 /*break*/, 5];
-                return [4 /*yield*/, space.getEnvironment(environment.sys.id)];
-            case 3:
-                status_1 = (_c.sent()).sys.status
-                    .sys.id;
-                if (status_1 === "ready") {
-                    Logger.success("Successfully processed new environment: \"" + environmentId + "\"");
-                    return [3 /*break*/, 5];
-                }
-                if (status_1 === "failed") {
-                    Logger.warn("Environment creation failed");
-                    return [3 /*break*/, 5];
-                }
-                return [4 /*yield*/, delay()];
-            case 4:
-                _c.sent();
-                count++;
-                return [3 /*break*/, 2];
-            case 5:
-                Logger.log("Update API Keys to allow access to new environment");
-                newEnv = {
-                    sys: {
-                        type: "Link",
-                        linkType: "Environment",
-                        id: environmentId,
-                    },
-                };
-                return [4 /*yield*/, space.getApiKeys()];
-            case 6:
-                keys = (_c.sent()).items;
-                return [4 /*yield*/, Promise.all(keys.map(function (key) {
-                        Logger.log("Updating: \"" + key.sys.id + "\"");
-                        key.environments.push(newEnv);
-                        return key.update();
-                    }))];
-            case 7:
-                _c.sent();
-                Logger.log("Set default locale to new environment");
-                return [4 /*yield*/, environment.getLocales()];
-            case 8:
-                defaultLocale = (_c.sent()).items.find(function (locale) { return locale.default; }).code;
-                Logger.log("Read all the available migrations from the file system");
-                return [4 /*yield*/, readdirAsync(MIGRATIONS_DIR)];
-            case 9:
-                availableMigrations = (_c.sent())
-                    .filter(function (file) { return /^\d+?\.js$/.test(file); })
-                    .map(function (file) { return filenameToVersion(file); })
-                    .sort(function (a, b) { return a - b; })
-                    .map(function (num) { return "" + num; });
-                Logger.log("Find current version of the contentful space");
-                return [4 /*yield*/, environment.getEntries({
-                        content_type: VERSION_CONTENT_TYPE,
-                    })];
-            case 10:
-                versions = (_c.sent()).items;
-                // If there is no entry or more than one of CONTENTFUL_VERSION_TRACKING
-                // Then throw an Error and abort
-                if (versions.length === 0) {
-                    throw new Error("There should be exactly one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
-                }
-                if (versions.length > 1) {
-                    throw new Error("There should only be one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
-                }
-                storedVersionEntry = versions[0];
-                currentVersionString = storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
-                Logger.log("Evaluate which migrations to run");
-                currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
-                // If the migration can't be found
-                // Then abort
-                if (currentMigrationIndex === -1) {
-                    throw new Error("Version " + currentVersionString + " is not matching with any known migration");
-                }
-                migrationsToRun = availableMigrations.slice(currentMigrationIndex + 1);
-                migrationOptions = {
-                    spaceId: SPACE_ID,
-                    environmentId: environmentId,
-                    accessToken: MANAGEMENT_API_KEY,
-                    yes: true,
-                };
-                Logger.log("Run migrations and update version entry");
-                mutableStoredVersionEntry = storedVersionEntry;
-                _c.label = 11;
-            case 11:
-                if (!(migrationToRun = migrationsToRun.shift())) return [3 /*break*/, 15];
-                filePath = external_path_default().join(MIGRATIONS_DIR, versionToFilename(migrationToRun));
-                Logger.log("Running " + filePath);
-                return [4 /*yield*/, Object(cli.runMigration)(Object.assign(migrationOptions, {
-                        filePath: filePath,
-                    }))];
-            case 12:
-                _c.sent();
-                Logger.success("Migration script " + migrationToRun + ".js succeeded");
-                mutableStoredVersionEntry.fields.version[defaultLocale] = migrationToRun;
-                return [4 /*yield*/, mutableStoredVersionEntry.update()];
-            case 13:
-                mutableStoredVersionEntry = _c.sent();
-                return [4 /*yield*/, mutableStoredVersionEntry.publish()];
-            case 14:
-                mutableStoredVersionEntry = _c.sent();
-                Logger.success("Updated field " + VERSION_FIELD + " in " + VERSION_CONTENT_TYPE + " entry to " + migrationToRun);
-                return [3 /*break*/, 11];
-            case 15:
-                Logger.log("Checking if we need to update master alias");
-                if (!(environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS)) return [3 /*break*/, 17];
-                Logger.log("Running on master.");
-                Logger.log("Updating master alias.");
-                return [4 /*yield*/, space
-                        .getEnvironmentAlias("master")
-                        .then(function (alias) {
-                        alias.environment.sys.id = environmentId;
-                        return alias.update();
-                    })
-                        .then(function (alias) { return Logger.success("alias " + alias.sys.id + " updated."); })
-                        .catch(Logger.error)];
-            case 16:
-                _c.sent();
-                return [3 /*break*/, 18];
-            case 17:
-                Logger.log("Running on feature branch");
-                Logger.log("No alias changes required");
-                _c.label = 18;
-            case 18:
-                if (!(INPUT_DELETE_FEATURE &&
-                    branchNames.baseRef === branchNames.defaultBranch && ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged))) return [3 /*break*/, 23];
-                _c.label = 19;
-            case 19:
-                _c.trys.push([19, 22, , 23]);
-                environmentIdToDelete = "GH-" + environmentNames.head;
-                Logger.log("Delete the environment: " + environmentIdToDelete);
-                return [4 /*yield*/, space.getEnvironment(environmentIdToDelete)];
-            case 20:
-                environment_1 = _c.sent();
-                return [4 /*yield*/, (environment_1 === null || environment_1 === void 0 ? void 0 : environment_1.delete())];
-            case 21:
-                _c.sent();
-                Logger.success("Deleted the environment: " + environmentIdToDelete);
-                return [3 /*break*/, 23];
-            case 22:
-                error_1 = _c.sent();
-                Logger.error("Cannot delete the environment");
-                return [3 /*break*/, 23];
-            case 23:
-                // Set the outputs for further actions
-                Object(core.setOutput)("environment_url", "https://app.contentful.com/spaces/" + space.sys.id + "/environments/" + environmentId);
-                Object(core.setOutput)("environment_name", environmentId);
-                Logger.success("🚀 All done 🚀");
-                return [2 /*return*/];
-        }
-    });
-}); };
-(function () { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var client, space, error_2;
-    return Object(tslib.__generator)(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                client = Object(contentful_management_node.createClient)({
-                    accessToken: MANAGEMENT_API_KEY,
-                });
-                return [4 /*yield*/, client.getSpace(SPACE_ID)];
-            case 1:
-                space = _a.sent();
-                _a.label = 2;
-            case 2:
-                _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, runAction(space)];
-            case 3:
-                _a.sent();
-                return [3 /*break*/, 5];
-            case 4:
-                error_2 = _a.sent();
-                Logger.error(error_2);
-                Object(core.setFailed)(error_2.message);
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
-        }
-    });
-}); })();
+function baseIsNative(value) {
+  if (!isObject(value) || isMasked(value)) {
+    return false;
+  }
+  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+  return pattern.test(toSource(value));
+}
+
+module.exports = baseIsNative;
 
 
 /***/ }),
@@ -15818,7 +15428,205 @@ module.exports = function highlightFileSync (fullPath, opts) {
 /* 123 */,
 /* 124 */,
 /* 125 */,
-/* 126 */,
+/* 126 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var isArray_1 = __webpack_require__(5);
+var isObject_1 = __webpack_require__(153);
+var isFunction_1 = __webpack_require__(442);
+var tryCatch_1 = __webpack_require__(362);
+var errorObject_1 = __webpack_require__(439);
+var UnsubscriptionError_1 = __webpack_require__(828);
+/**
+ * Represents a disposable resource, such as the execution of an Observable. A
+ * Subscription has one important method, `unsubscribe`, that takes no argument
+ * and just disposes the resource held by the subscription.
+ *
+ * Additionally, subscriptions may be grouped together through the `add()`
+ * method, which will attach a child Subscription to the current Subscription.
+ * When a Subscription is unsubscribed, all its children (and its grandchildren)
+ * will be unsubscribed as well.
+ *
+ * @class Subscription
+ */
+var Subscription = (function () {
+    /**
+     * @param {function(): void} [unsubscribe] A function describing how to
+     * perform the disposal of resources when the `unsubscribe` method is called.
+     */
+    function Subscription(unsubscribe) {
+        /**
+         * A flag to indicate whether this Subscription has already been unsubscribed.
+         * @type {boolean}
+         */
+        this.closed = false;
+        this._parent = null;
+        this._parents = null;
+        this._subscriptions = null;
+        if (unsubscribe) {
+            this._unsubscribe = unsubscribe;
+        }
+    }
+    /**
+     * Disposes the resources held by the subscription. May, for instance, cancel
+     * an ongoing Observable execution or cancel any other type of work that
+     * started when the Subscription was created.
+     * @return {void}
+     */
+    Subscription.prototype.unsubscribe = function () {
+        var hasErrors = false;
+        var errors;
+        if (this.closed) {
+            return;
+        }
+        var _a = this, _parent = _a._parent, _parents = _a._parents, _unsubscribe = _a._unsubscribe, _subscriptions = _a._subscriptions;
+        this.closed = true;
+        this._parent = null;
+        this._parents = null;
+        // null out _subscriptions first so any child subscriptions that attempt
+        // to remove themselves from this subscription will noop
+        this._subscriptions = null;
+        var index = -1;
+        var len = _parents ? _parents.length : 0;
+        // if this._parent is null, then so is this._parents, and we
+        // don't have to remove ourselves from any parent subscriptions.
+        while (_parent) {
+            _parent.remove(this);
+            // if this._parents is null or index >= len,
+            // then _parent is set to null, and the loop exits
+            _parent = ++index < len && _parents[index] || null;
+        }
+        if (isFunction_1.isFunction(_unsubscribe)) {
+            var trial = tryCatch_1.tryCatch(_unsubscribe).call(this);
+            if (trial === errorObject_1.errorObject) {
+                hasErrors = true;
+                errors = errors || (errorObject_1.errorObject.e instanceof UnsubscriptionError_1.UnsubscriptionError ?
+                    flattenUnsubscriptionErrors(errorObject_1.errorObject.e.errors) : [errorObject_1.errorObject.e]);
+            }
+        }
+        if (isArray_1.isArray(_subscriptions)) {
+            index = -1;
+            len = _subscriptions.length;
+            while (++index < len) {
+                var sub = _subscriptions[index];
+                if (isObject_1.isObject(sub)) {
+                    var trial = tryCatch_1.tryCatch(sub.unsubscribe).call(sub);
+                    if (trial === errorObject_1.errorObject) {
+                        hasErrors = true;
+                        errors = errors || [];
+                        var err = errorObject_1.errorObject.e;
+                        if (err instanceof UnsubscriptionError_1.UnsubscriptionError) {
+                            errors = errors.concat(flattenUnsubscriptionErrors(err.errors));
+                        }
+                        else {
+                            errors.push(err);
+                        }
+                    }
+                }
+            }
+        }
+        if (hasErrors) {
+            throw new UnsubscriptionError_1.UnsubscriptionError(errors);
+        }
+    };
+    /**
+     * Adds a tear down to be called during the unsubscribe() of this
+     * Subscription.
+     *
+     * If the tear down being added is a subscription that is already
+     * unsubscribed, is the same reference `add` is being called on, or is
+     * `Subscription.EMPTY`, it will not be added.
+     *
+     * If this subscription is already in an `closed` state, the passed
+     * tear down logic will be executed immediately.
+     *
+     * @param {TeardownLogic} teardown The additional logic to execute on
+     * teardown.
+     * @return {Subscription} Returns the Subscription used or created to be
+     * added to the inner subscriptions list. This Subscription can be used with
+     * `remove()` to remove the passed teardown logic from the inner subscriptions
+     * list.
+     */
+    Subscription.prototype.add = function (teardown) {
+        if (!teardown || (teardown === Subscription.EMPTY)) {
+            return Subscription.EMPTY;
+        }
+        if (teardown === this) {
+            return this;
+        }
+        var subscription = teardown;
+        switch (typeof teardown) {
+            case 'function':
+                subscription = new Subscription(teardown);
+            case 'object':
+                if (subscription.closed || typeof subscription.unsubscribe !== 'function') {
+                    return subscription;
+                }
+                else if (this.closed) {
+                    subscription.unsubscribe();
+                    return subscription;
+                }
+                else if (typeof subscription._addParent !== 'function' /* quack quack */) {
+                    var tmp = subscription;
+                    subscription = new Subscription();
+                    subscription._subscriptions = [tmp];
+                }
+                break;
+            default:
+                throw new Error('unrecognized teardown ' + teardown + ' added to Subscription.');
+        }
+        var subscriptions = this._subscriptions || (this._subscriptions = []);
+        subscriptions.push(subscription);
+        subscription._addParent(this);
+        return subscription;
+    };
+    /**
+     * Removes a Subscription from the internal list of subscriptions that will
+     * unsubscribe during the unsubscribe process of this Subscription.
+     * @param {Subscription} subscription The subscription to remove.
+     * @return {void}
+     */
+    Subscription.prototype.remove = function (subscription) {
+        var subscriptions = this._subscriptions;
+        if (subscriptions) {
+            var subscriptionIndex = subscriptions.indexOf(subscription);
+            if (subscriptionIndex !== -1) {
+                subscriptions.splice(subscriptionIndex, 1);
+            }
+        }
+    };
+    Subscription.prototype._addParent = function (parent) {
+        var _a = this, _parent = _a._parent, _parents = _a._parents;
+        if (!_parent || _parent === parent) {
+            // If we don't have a parent, or the new parent is the same as the
+            // current parent, then set this._parent to the new parent.
+            this._parent = parent;
+        }
+        else if (!_parents) {
+            // If there's already one parent, but not multiple, allocate an Array to
+            // store the rest of the parent Subscriptions.
+            this._parents = [parent];
+        }
+        else if (_parents.indexOf(parent) === -1) {
+            // Only add the new parent to the _parents list if it's not already there.
+            _parents.push(parent);
+        }
+    };
+    Subscription.EMPTY = (function (empty) {
+        empty.closed = true;
+        return empty;
+    }(new Subscription()));
+    return Subscription;
+}());
+exports.Subscription = Subscription;
+function flattenUnsubscriptionErrors(errors) {
+    return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError_1.UnsubscriptionError) ? err.errors : err); }, []);
+}
+//# sourceMappingURL=Subscription.js.map
+
+/***/ }),
 /* 127 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -29612,7 +29420,7 @@ module.exports = __webpack_require__(87);
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = __webpack_require__(794);
+module.exports = __webpack_require__(413);
 
 /***/ }),
 
@@ -31324,7 +31132,7 @@ module.exports = opts => {
 const logUpdate = __webpack_require__(224);
 const chalk = __webpack_require__(343);
 const figures = __webpack_require__(517);
-const indentString = __webpack_require__(689);
+const indentString = __webpack_require__(180);
 const cliTruncate = __webpack_require__(864);
 const stripAnsi = __webpack_require__(90);
 const utils = __webpack_require__(726);
@@ -32529,7 +32337,40 @@ module.exports = runOptionsSchema
 
 
 /***/ }),
-/* 180 */,
+/* 180 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = (str, count, opts) => {
+	// Support older versions: use the third parameter as options.indent
+	// TODO: Remove the workaround in the next major version
+	const options = typeof opts === 'object' ? Object.assign({indent: ' '}, opts) : {indent: opts || ' '};
+	count = count === undefined ? 1 : count;
+
+	if (typeof str !== 'string') {
+		throw new TypeError(`Expected \`input\` to be a \`string\`, got \`${typeof str}\``);
+	}
+
+	if (typeof count !== 'number') {
+		throw new TypeError(`Expected \`count\` to be a \`number\`, got \`${typeof count}\``);
+	}
+
+	if (typeof options.indent !== 'string') {
+		throw new TypeError(`Expected \`options.indent\` to be a \`string\`, got \`${typeof options.indent}\``);
+	}
+
+	if (count === 0) {
+		return str;
+	}
+
+	const regex = options.includeEmptyLines ? /^/mg : /^(?!\s*$)/mg;
+	return str.replace(regex, options.indent.repeat(count));
+}
+;
+
+
+/***/ }),
 /* 181 */,
 /* 182 */,
 /* 183 */
@@ -32869,7 +32710,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var Subscription_1 = __webpack_require__(856);
+var Subscription_1 = __webpack_require__(126);
 /**
  * We need this JSDoc comment for affecting ESDoc.
  * @ignore
@@ -37125,7 +36966,7 @@ const internals = {
     array: __webpack_require__(451),
     boolean: __webpack_require__(21),
     binary: __webpack_require__(888),
-    date: __webpack_require__(847),
+    date: __webpack_require__(794),
     number: __webpack_require__(383),
     object: __webpack_require__(177),
     string: __webpack_require__(979)
@@ -53295,7 +53136,7 @@ module.exports = __webpack_require__(87);
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = __webpack_require__(794);
+module.exports = __webpack_require__(413);
 
 /***/ }),
 
@@ -53355,7 +53196,7 @@ module.exports = __webpack_require__(761);
 
 
 var Buffer = __webpack_require__(293).Buffer,
-    Transform = __webpack_require__(794).Transform;
+    Transform = __webpack_require__(413).Transform;
 
 
 // == Exports ==================================================================
@@ -54169,7 +54010,7 @@ module.exports = function (iconv) {
 
         // -- Readable -------------------------------------------------------------
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(794).Readable;
+            var Readable = __webpack_require__(413).Readable;
 
             original.ReadableSetEncoding = Readable.prototype.setEncoding;
             Readable.prototype.setEncoding = function setEncoding(enc, options) {
@@ -54203,7 +54044,7 @@ module.exports = function (iconv) {
         Buffer.prototype.write = original.BufferWrite;
 
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(794).Readable;
+            var Readable = __webpack_require__(413).Readable;
 
             Readable.prototype.setEncoding = original.ReadableSetEncoding;
             delete Readable.prototype.collect;
@@ -55380,7 +55221,7 @@ module.exports = (flag, argv) => {
 /* 366 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var Stream = __webpack_require__(794)
+var Stream = __webpack_require__(413)
 
 module.exports = MuteStream
 
@@ -57007,7 +56848,7 @@ exports.default = SchemaValidator;
 /* 400 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(794)
+var Stream = __webpack_require__(413)
 
 // through
 //
@@ -57963,10 +57804,9 @@ module.exports = baseIsTypedArray;
 
 /***/ }),
 /* 413 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-module.exports = __webpack_require__(141);
-
+module.exports = require("stream");
 
 /***/ }),
 /* 414 */
@@ -59855,7 +59695,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__webpack_require__(794));
+var Stream = _interopDefault(__webpack_require__(413));
 var http = _interopDefault(__webpack_require__(605));
 var Url = _interopDefault(__webpack_require__(835));
 var https = _interopDefault(__webpack_require__(211));
@@ -65501,7 +65341,7 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __webpack_require__(413);
+                tunnel = __webpack_require__(856);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
@@ -89886,59 +89726,7 @@ module.exports = TaskWrapper;
 /***/ }),
 /* 583 */,
 /* 584 */,
-/* 585 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var isFunction = __webpack_require__(10),
-    isMasked = __webpack_require__(159),
-    isObject = __webpack_require__(678),
-    toSource = __webpack_require__(473);
-
-/**
- * Used to match `RegExp`
- * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
- */
-var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-
-/** Used to detect host constructors (Safari). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/** Used for built-in method references. */
-var funcProto = Function.prototype,
-    objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var funcToString = funcProto.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/**
- * The base implementation of `_.isNative` without bad shim checks.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function,
- *  else `false`.
- */
-function baseIsNative(value) {
-  if (!isObject(value) || isMasked(value)) {
-    return false;
-  }
-  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-  return pattern.test(toSource(value));
-}
-
-module.exports = baseIsNative;
-
-
-/***/ }),
+/* 585 */,
 /* 586 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -96304,36 +96092,468 @@ module.exports = function () {
 /* 687 */,
 /* 688 */,
 /* 689 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
 
-module.exports = (str, count, opts) => {
-	// Support older versions: use the third parameter as options.indent
-	// TODO: Remove the workaround in the next major version
-	const options = typeof opts === 'object' ? Object.assign({indent: ' '}, opts) : {indent: opts || ' '};
-	count = count === undefined ? 1 : count;
+// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
+var tslib = __webpack_require__(422);
 
-	if (typeof str !== 'string') {
-		throw new TypeError(`Expected \`input\` to be a \`string\`, got \`${typeof str}\``);
-	}
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __webpack_require__(470);
 
-	if (typeof count !== 'number') {
-		throw new TypeError(`Expected \`count\` to be a \`number\`, got \`${typeof count}\``);
-	}
+// EXTERNAL MODULE: ./node_modules/contentful-management/dist/contentful-management.node.js
+var contentful_management_node = __webpack_require__(311);
 
-	if (typeof options.indent !== 'string') {
-		throw new TypeError(`Expected \`options.indent\` to be a \`string\`, got \`${typeof options.indent}\``);
-	}
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __webpack_require__(469);
 
-	if (count === 0) {
-		return str;
-	}
+// EXTERNAL MODULE: ./node_modules/contentful-migration/built/bin/cli.js
+var cli = __webpack_require__(315);
 
-	const regex = options.includeEmptyLines ? /^/mg : /^(?!\s*$)/mg;
-	return str.replace(regex, options.indent.repeat(count));
-}
-;
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __webpack_require__(747);
+
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(622);
+var external_path_default = /*#__PURE__*/__webpack_require__.n(external_path_);
+
+// EXTERNAL MODULE: external "util"
+var external_util_ = __webpack_require__(669);
+
+// CONCATENATED MODULE: ./src/constants.ts
+var constants_a;
+
+var GITHUB_WORKSPACE = (constants_a = process.env, constants_a.GITHUB_WORKSPACE), SPACE_ID = constants_a.INPUT_SPACE_ID, MANAGEMENT_API_KEY = constants_a.INPUT_MANAGEMENT_API_KEY, INPUT_MIGRATIONS_DIR = constants_a.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = constants_a.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = constants_a.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = constants_a.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = constants_a.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = constants_a.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = constants_a.INPUT_VERSION_FIELD;
+var DEFAULT_MIGRATIONS_DIR = "migrations";
+var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
+var DEFAULT_FEATURE_PATTERN = "GH-[branch]";
+var DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
+var DEFAULT_VERSION_FIELD = "version";
+var VERSION_CONTENT_TYPE = INPUT_VERSION_CONTENT_TYPE || DEFAULT_VERSION_CONTENT_TYPE;
+var FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
+var MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
+var VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
+var MIGRATIONS_DIR = external_path_default().join(GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
+var CONTENTFUL_MASTER = "master";
+var DELAY = 3000;
+var MAX_NUMBER_OF_TRIES = 10;
+
+// EXTERNAL MODULE: ./node_modules/chalk/source/index.js
+var source = __webpack_require__(843);
+var source_default = /*#__PURE__*/__webpack_require__.n(source);
+
+// CONCATENATED MODULE: ./src/types.ts
+var EventNames;
+(function (EventNames) {
+    EventNames["pullRequest"] = "pull_request";
+})(EventNames || (EventNames = {}));
+
+// CONCATENATED MODULE: ./src/utils.ts
+var utils_a;
+
+
+
+
+
+// Force colors on github
+source_default.a.level = 3;
+var Logger = {
+    log: function (message) {
+        console.log(source_default().white(message));
+    },
+    success: function (message) {
+        console.log("✅", source_default().green(message));
+    },
+    error: function (message) {
+        console.log("💩", source_default().red(message));
+    },
+    warn: function (message) {
+        console.log("⚠️", source_default().yellow(message));
+    },
+};
+/**
+ * Promise based delay
+ * @param time
+ */
+var delay = function (time) {
+    if (time === void 0) { time = DELAY; }
+    return new Promise(function (resolve) { return setTimeout(resolve, time); });
+};
+/**
+ * Convert fileNames to integers
+ * @example
+ * filenameToVersion("1.js") // 1
+ */
+var filenameToVersion = function (file) {
+    return parseInt(file.replace(/\.js$/, "").replace(/_/g, "."), 10);
+};
+/**
+ * Convert integers to filenames
+ * @example
+ * versionToFilename(1) // 1.js
+ */
+var versionToFilename = function (version) {
+    return version.replace(/\./g, "_") + ".js";
+};
+/**
+ * Convert a branchName to a valid environmentName
+ * @param branchName
+ */
+var branchNameToEnvironmentName = function (branchName) {
+    return branchName.replace(/[\/_.]/g, "-");
+};
+var Matcher;
+(function (Matcher) {
+    Matcher["YY"] = "YY";
+    Matcher["YYYY"] = "YYYY";
+    Matcher["MM"] = "MM";
+    Matcher["DD"] = "DD";
+    Matcher["hh"] = "hh";
+    Matcher["mm"] = "mm";
+    Matcher["ss"] = "ss";
+    Matcher["branch"] = "branch";
+})(Matcher || (Matcher = {}));
+var matchers = (utils_a = {},
+    utils_a[Matcher.ss] = function (date) { return ("" + date.getUTCSeconds()).padStart(2, "0"); },
+    utils_a[Matcher.hh] = function (date) { return ("" + date.getUTCHours()).padStart(2, "0"); },
+    utils_a[Matcher.mm] = function (date) { return ("" + date.getUTCMinutes()).padStart(2, "0"); },
+    utils_a[Matcher.YYYY] = function (date) { return "" + date.getUTCFullYear(); },
+    utils_a[Matcher.YY] = function (date) { return ("" + date.getUTCFullYear()).substr(2, 2); },
+    utils_a[Matcher.MM] = function (date) { return ("" + (date.getUTCMonth() + 1)).padStart(2, "0"); },
+    utils_a[Matcher.DD] = function (date) { return ("" + date.getDate()).padStart(2, "0"); },
+    utils_a[Matcher.branch] = function (branchName) { return branchNameToEnvironmentName(branchName); },
+    utils_a);
+/**
+ *
+ * @param pattern
+ * @param branchName
+ */
+var getNameFromPattern = function (pattern, _a) {
+    var _b = _a === void 0 ? {} : _a, branchName = _b.branchName;
+    var date = new Date();
+    return pattern.replace(/\[(YYYY|YY|MM|DD|hh|mm|ss|branch)]/g, function (substring, match) {
+        switch (match) {
+            case Matcher.branch:
+                return matchers[Matcher.branch](branchName);
+            case Matcher.YYYY:
+            case Matcher.YY:
+            case Matcher.MM:
+            case Matcher.DD:
+            case Matcher.hh:
+            case Matcher.mm:
+            case Matcher.ss:
+                return matchers[match](date);
+            default:
+                return substring;
+        }
+    });
+};
+/**
+ * Get the branchNames based on the eventName
+ */
+var getBranchNames = function () {
+    var _a = github.context, eventName = _a.eventName, payload = _a.payload;
+    var defaultBranch = payload.repository.default_branch;
+    // Check the eventName
+    switch (eventName) {
+        // If pullRequest we need to get the head and base
+        case EventNames.pullRequest:
+            return {
+                baseRef: payload.pull_request.base.ref,
+                headRef: payload.pull_request.head.ref,
+                defaultBranch: defaultBranch,
+            };
+        // If not pullRequest we need work on the baseRef therefore head is null
+        default:
+            return {
+                headRef: null,
+                baseRef: payload.ref.replace(/^refs\/heads\//, ""),
+                defaultBranch: defaultBranch,
+            };
+    }
+};
+/**
+ * Get the environment from a space
+ * Checks if an environment already exists and then flushes it
+ * @param space
+ * @param branchNames
+ */
+var getEnvironment = function (space, branchNames) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
+    var environmentNames, environmentId, environment, e_1;
+    var _a, _b;
+    var _c;
+    return Object(tslib.__generator)(this, function (_d) {
+        switch (_d.label) {
+            case 0:
+                environmentNames = {
+                    base: branchNameToEnvironmentName(branchNames.baseRef),
+                    head: branchNames.headRef
+                        ? branchNameToEnvironmentName(branchNames.headRef)
+                        : null,
+                };
+                environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
+                    ? getNameFromPattern(MASTER_PATTERN)
+                    : getNameFromPattern(FEATURE_PATTERN, {
+                        branchName: branchNames.headRef,
+                    });
+                Logger.log("environmentId: \"" + environmentId + "\"");
+                if (!(environmentId === CONTENTFUL_MASTER)) return [3 /*break*/, 2];
+                _a = {
+                    environmentNames: environmentNames,
+                    environmentId: environmentId
+                };
+                return [4 /*yield*/, space.getEnvironment(environmentId)];
+            case 1: return [2 /*return*/, (_a.environment = _d.sent(),
+                    _a)];
+            case 2:
+                // Else we need to check for an existing environment and flush it
+                Logger.log("Checking for existing versions of environment: \"" + environmentId + "\"");
+                _d.label = 3;
+            case 3:
+                _d.trys.push([3, 6, , 7]);
+                return [4 /*yield*/, space.getEnvironment(environmentId)];
+            case 4:
+                environment = _d.sent();
+                return [4 /*yield*/, (environment === null || environment === void 0 ? void 0 : environment.delete())];
+            case 5:
+                _d.sent();
+                Logger.success("Environment deleted: \"" + environmentId + "\"");
+                return [3 /*break*/, 7];
+            case 6:
+                e_1 = _d.sent();
+                Logger.log("Environment not found: \"" + environmentId + "\"");
+                return [3 /*break*/, 7];
+            case 7:
+                Logger.log("Creating environment " + environmentId);
+                _b = {
+                    environmentNames: environmentNames,
+                    environmentId: environmentId
+                };
+                return [4 /*yield*/, space.createEnvironmentWithId(environmentId, {
+                        name: environmentId,
+                    })];
+            case 8: return [2 /*return*/, (_b.environment = _d.sent(),
+                    _b)];
+        }
+    });
+}); };
+
+// CONCATENATED MODULE: ./src/action.ts
+
+
+
+
+
+
+
+
+
+var readdirAsync = Object(external_util_.promisify)(external_fs_.readdir);
+/**
+ *
+ * @param space
+ */
+var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
+    var branchNames, _a, environmentId, environment, environmentNames, count, status_1, newEnv, keys, defaultLocale, availableMigrations, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
+    var _b;
+    return Object(tslib.__generator)(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                branchNames = getBranchNames();
+                return [4 /*yield*/, getEnvironment(space, branchNames)];
+            case 1:
+                _a = _c.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentNames = _a.environmentNames;
+                count = 0;
+                Logger.log("Waiting for environment processing...");
+                _c.label = 2;
+            case 2:
+                if (!(count < MAX_NUMBER_OF_TRIES)) return [3 /*break*/, 5];
+                return [4 /*yield*/, space.getEnvironment(environment.sys.id)];
+            case 3:
+                status_1 = (_c.sent()).sys.status
+                    .sys.id;
+                if (status_1 === "ready") {
+                    Logger.success("Successfully processed new environment: \"" + environmentId + "\"");
+                    return [3 /*break*/, 5];
+                }
+                if (status_1 === "failed") {
+                    Logger.warn("Environment creation failed");
+                    return [3 /*break*/, 5];
+                }
+                return [4 /*yield*/, delay()];
+            case 4:
+                _c.sent();
+                count++;
+                return [3 /*break*/, 2];
+            case 5:
+                Logger.log("Update API Keys to allow access to new environment");
+                newEnv = {
+                    sys: {
+                        type: "Link",
+                        linkType: "Environment",
+                        id: environmentId,
+                    },
+                };
+                return [4 /*yield*/, space.getApiKeys()];
+            case 6:
+                keys = (_c.sent()).items;
+                return [4 /*yield*/, Promise.all(keys.map(function (key) {
+                        Logger.log("Updating: \"" + key.sys.id + "\"");
+                        key.environments.push(newEnv);
+                        return key.update();
+                    }))];
+            case 7:
+                _c.sent();
+                Logger.log("Set default locale to new environment");
+                return [4 /*yield*/, environment.getLocales()];
+            case 8:
+                defaultLocale = (_c.sent()).items.find(function (locale) { return locale.default; }).code;
+                Logger.log("Read all the available migrations from the file system");
+                return [4 /*yield*/, readdirAsync(MIGRATIONS_DIR)];
+            case 9:
+                availableMigrations = (_c.sent())
+                    .filter(function (file) { return /^\d+?\.js$/.test(file); })
+                    .map(function (file) { return filenameToVersion(file); })
+                    .sort(function (a, b) { return a - b; })
+                    .map(function (num) { return "" + num; });
+                Logger.log("Find current version of the contentful space");
+                return [4 /*yield*/, environment.getEntries({
+                        content_type: VERSION_CONTENT_TYPE,
+                    })];
+            case 10:
+                versions = (_c.sent()).items;
+                // If there is no entry or more than one of CONTENTFUL_VERSION_TRACKING
+                // Then throw an Error and abort
+                if (versions.length === 0) {
+                    throw new Error("There should be exactly one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
+                }
+                if (versions.length > 1) {
+                    throw new Error("There should only be one entry of type \"" + VERSION_CONTENT_TYPE + "\"");
+                }
+                storedVersionEntry = versions[0];
+                currentVersionString = storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
+                Logger.log("Evaluate which migrations to run");
+                currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
+                // If the migration can't be found
+                // Then abort
+                if (currentMigrationIndex === -1) {
+                    throw new Error("Version " + currentVersionString + " is not matching with any known migration");
+                }
+                migrationsToRun = availableMigrations.slice(currentMigrationIndex + 1);
+                migrationOptions = {
+                    spaceId: SPACE_ID,
+                    environmentId: environmentId,
+                    accessToken: MANAGEMENT_API_KEY,
+                    yes: true,
+                };
+                Logger.log("Run migrations and update version entry");
+                mutableStoredVersionEntry = storedVersionEntry;
+                _c.label = 11;
+            case 11:
+                if (!(migrationToRun = migrationsToRun.shift())) return [3 /*break*/, 15];
+                filePath = external_path_default().join(MIGRATIONS_DIR, versionToFilename(migrationToRun));
+                Logger.log("Running " + filePath);
+                return [4 /*yield*/, Object(cli.runMigration)(Object.assign(migrationOptions, {
+                        filePath: filePath,
+                    }))];
+            case 12:
+                _c.sent();
+                Logger.success("Migration script " + migrationToRun + ".js succeeded");
+                mutableStoredVersionEntry.fields.version[defaultLocale] = migrationToRun;
+                return [4 /*yield*/, mutableStoredVersionEntry.update()];
+            case 13:
+                mutableStoredVersionEntry = _c.sent();
+                return [4 /*yield*/, mutableStoredVersionEntry.publish()];
+            case 14:
+                mutableStoredVersionEntry = _c.sent();
+                Logger.success("Updated field " + VERSION_FIELD + " in " + VERSION_CONTENT_TYPE + " entry to " + migrationToRun);
+                return [3 /*break*/, 11];
+            case 15:
+                Logger.log("Checking if we need to update master alias");
+                if (!(environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS)) return [3 /*break*/, 17];
+                Logger.log("Running on master.");
+                Logger.log("Updating master alias.");
+                return [4 /*yield*/, space
+                        .getEnvironmentAlias("master")
+                        .then(function (alias) {
+                        alias.environment.sys.id = environmentId;
+                        return alias.update();
+                    })
+                        .then(function (alias) { return Logger.success("alias " + alias.sys.id + " updated."); })
+                        .catch(Logger.error)];
+            case 16:
+                _c.sent();
+                return [3 /*break*/, 18];
+            case 17:
+                Logger.log("Running on feature branch");
+                Logger.log("No alias changes required");
+                _c.label = 18;
+            case 18:
+                if (!(INPUT_DELETE_FEATURE &&
+                    branchNames.baseRef === branchNames.defaultBranch && ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged))) return [3 /*break*/, 23];
+                _c.label = 19;
+            case 19:
+                _c.trys.push([19, 22, , 23]);
+                environmentIdToDelete = "GH-" + environmentNames.head;
+                Logger.log("Delete the environment: " + environmentIdToDelete);
+                return [4 /*yield*/, space.getEnvironment(environmentIdToDelete)];
+            case 20:
+                environment_1 = _c.sent();
+                return [4 /*yield*/, (environment_1 === null || environment_1 === void 0 ? void 0 : environment_1.delete())];
+            case 21:
+                _c.sent();
+                Logger.success("Deleted the environment: " + environmentIdToDelete);
+                return [3 /*break*/, 23];
+            case 22:
+                error_1 = _c.sent();
+                Logger.error("Cannot delete the environment");
+                return [3 /*break*/, 23];
+            case 23:
+                // Set the outputs for further actions
+                Object(core.setOutput)("environment_url", "https://app.contentful.com/spaces/" + space.sys.id + "/environments/" + environmentId);
+                Object(core.setOutput)("environment_name", environmentId);
+                Logger.success("🚀 All done 🚀");
+                return [2 /*return*/];
+        }
+    });
+}); };
+
+// CONCATENATED MODULE: ./src/index.ts
+
+
+
+
+
+
+(function () { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
+    var client, space, error_1;
+    return Object(tslib.__generator)(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                client = Object(contentful_management_node.createClient)({
+                    accessToken: MANAGEMENT_API_KEY,
+                });
+                return [4 /*yield*/, client.getSpace(SPACE_ID)];
+            case 1:
+                space = _a.sent();
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, runAction(space)];
+            case 3:
+                _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
+                error_1 = _a.sent();
+                Logger.error(error_1);
+                Object(core.setFailed)(error_1.message);
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
+        }
+    });
+}); })();
 
 
 /***/ }),
@@ -96735,7 +96955,7 @@ exports.isPlainObject = isPlainObject;
 /* 707 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var baseIsNative = __webpack_require__(585),
+var baseIsNative = __webpack_require__(97),
     getValue = __webpack_require__(879);
 
 /**
@@ -101927,9 +102147,187 @@ module.exports = isPrototype;
 
 /***/ }),
 /* 794 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = require("stream");
+"use strict";
+
+
+// Load modules
+
+const Any = __webpack_require__(991);
+const Ref = __webpack_require__(953);
+const Hoek = __webpack_require__(970);
+
+
+// Declare internals
+
+const internals = {};
+
+internals.isoDate = /^(?:[-+]\d{2})?(?:\d{4}(?!\d{2}\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\1(?:[12]\d|0[1-9]|3[01]))?|W(?:[0-4]\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\d|[12]\d{2}|3(?:[0-5]\d|6[1-6])))(?![T]$|[T][\d]+Z$)(?:[T\s](?:(?:(?:[01]\d|2[0-3])(?:(:?)[0-5]\d)?|24\:?00)(?:[.,]\d+(?!:))?)(?:\2[0-5]\d(?:[.,]\d+)?)?(?:[Z]|(?:[+-])(?:[01]\d|2[0-3])(?::?[0-5]\d)?)?)?)?$/;
+internals.invalidDate = new Date('');
+internals.isIsoDate = (() => {
+
+    const isoString = internals.isoDate.toString();
+
+    return (date) => {
+
+        return date && (date.toString() === isoString);
+    };
+})();
+
+internals.Date = class extends Any {
+
+    constructor() {
+
+        super();
+        this._type = 'date';
+    }
+
+    _base(value, state, options) {
+
+        const result = {
+            value: (options.convert && internals.Date.toDate(value, this._flags.format, this._flags.timestamp, this._flags.multiplier)) || value
+        };
+
+        if (result.value instanceof Date && !isNaN(result.value.getTime())) {
+            result.errors = null;
+        }
+        else if (!options.convert) {
+            result.errors = this.createError('date.strict', null, state, options);
+        }
+        else {
+            let type;
+            if (internals.isIsoDate(this._flags.format)) {
+                type = 'isoDate';
+            }
+            else if (this._flags.timestamp) {
+                type = `timestamp.${this._flags.timestamp}`;
+            }
+            else {
+                type = 'base';
+            }
+
+            result.errors = this.createError(`date.${type}`, null, state, options);
+        }
+
+        return result;
+    }
+
+    static toDate(value, format, timestamp, multiplier) {
+
+        if (value instanceof Date) {
+            return value;
+        }
+
+        if (typeof value === 'string' ||
+            (typeof value === 'number' && !isNaN(value) && isFinite(value))) {
+
+            if (typeof value === 'string' &&
+                /^[+-]?\d+(\.\d+)?$/.test(value)) {
+
+                value = parseFloat(value);
+            }
+
+            let date;
+            if (format && internals.isIsoDate(format)) {
+                date = format.test(value) ? new Date(value) : internals.invalidDate;
+            }
+            else if (timestamp && multiplier) {
+                date = new Date(value * multiplier);
+            }
+            else {
+                date = new Date(value);
+            }
+
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+
+        return null;
+    }
+
+    iso() {
+
+        if (this._flags.format === internals.isoDate) {
+            return this;
+        }
+
+        const obj = this.clone();
+        obj._flags.format = internals.isoDate;
+        return obj;
+    }
+
+    timestamp(type) {
+
+        type = type || 'javascript';
+
+        const allowed = ['javascript', 'unix'];
+        Hoek.assert(allowed.indexOf(type) !== -1, '"type" must be one of "' + allowed.join('", "') + '"');
+
+        if (this._flags.timestamp === type) {
+            return this;
+        }
+
+        const obj = this.clone();
+        obj._flags.timestamp = type;
+        obj._flags.multiplier = type === 'unix' ? 1000 : 1;
+        return obj;
+    }
+
+    _isIsoDate(value) {
+
+        return internals.isoDate.test(value);
+    }
+
+};
+
+internals.compare = function (type, compare) {
+
+    return function (date) {
+
+        const isNow = date === 'now';
+        const isRef = Ref.isRef(date);
+
+        if (!isNow && !isRef) {
+            date = internals.Date.toDate(date);
+        }
+
+        Hoek.assert(date, 'Invalid date format');
+
+        return this._test(type, date, function (value, state, options) {
+
+            let compareTo;
+            if (isNow) {
+                compareTo = Date.now();
+            }
+            else if (isRef) {
+                compareTo = internals.Date.toDate(date(state.reference || state.parent, options));
+
+                if (!compareTo) {
+                    return this.createError('date.ref', { ref: date.key }, state, options);
+                }
+
+                compareTo = compareTo.getTime();
+            }
+            else {
+                compareTo = date.getTime();
+            }
+
+            if (compare(value.getTime(), compareTo)) {
+                return value;
+            }
+
+            return this.createError('date.' + type, { limit: new Date(compareTo) }, state, options);
+        });
+    };
+};
+internals.Date.prototype.min = internals.compare('min', (value, date) => value >= date);
+internals.Date.prototype.max = internals.compare('max', (value, date) => value <= date);
+
+
+module.exports = new internals.Date();
+
 
 /***/ }),
 /* 795 */,
@@ -106179,190 +106577,7 @@ exports.toggle = (force, stream) => {
 
 
 /***/ }),
-/* 847 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-// Load modules
-
-const Any = __webpack_require__(991);
-const Ref = __webpack_require__(953);
-const Hoek = __webpack_require__(970);
-
-
-// Declare internals
-
-const internals = {};
-
-internals.isoDate = /^(?:[-+]\d{2})?(?:\d{4}(?!\d{2}\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\1(?:[12]\d|0[1-9]|3[01]))?|W(?:[0-4]\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\d|[12]\d{2}|3(?:[0-5]\d|6[1-6])))(?![T]$|[T][\d]+Z$)(?:[T\s](?:(?:(?:[01]\d|2[0-3])(?:(:?)[0-5]\d)?|24\:?00)(?:[.,]\d+(?!:))?)(?:\2[0-5]\d(?:[.,]\d+)?)?(?:[Z]|(?:[+-])(?:[01]\d|2[0-3])(?::?[0-5]\d)?)?)?)?$/;
-internals.invalidDate = new Date('');
-internals.isIsoDate = (() => {
-
-    const isoString = internals.isoDate.toString();
-
-    return (date) => {
-
-        return date && (date.toString() === isoString);
-    };
-})();
-
-internals.Date = class extends Any {
-
-    constructor() {
-
-        super();
-        this._type = 'date';
-    }
-
-    _base(value, state, options) {
-
-        const result = {
-            value: (options.convert && internals.Date.toDate(value, this._flags.format, this._flags.timestamp, this._flags.multiplier)) || value
-        };
-
-        if (result.value instanceof Date && !isNaN(result.value.getTime())) {
-            result.errors = null;
-        }
-        else if (!options.convert) {
-            result.errors = this.createError('date.strict', null, state, options);
-        }
-        else {
-            let type;
-            if (internals.isIsoDate(this._flags.format)) {
-                type = 'isoDate';
-            }
-            else if (this._flags.timestamp) {
-                type = `timestamp.${this._flags.timestamp}`;
-            }
-            else {
-                type = 'base';
-            }
-
-            result.errors = this.createError(`date.${type}`, null, state, options);
-        }
-
-        return result;
-    }
-
-    static toDate(value, format, timestamp, multiplier) {
-
-        if (value instanceof Date) {
-            return value;
-        }
-
-        if (typeof value === 'string' ||
-            (typeof value === 'number' && !isNaN(value) && isFinite(value))) {
-
-            if (typeof value === 'string' &&
-                /^[+-]?\d+(\.\d+)?$/.test(value)) {
-
-                value = parseFloat(value);
-            }
-
-            let date;
-            if (format && internals.isIsoDate(format)) {
-                date = format.test(value) ? new Date(value) : internals.invalidDate;
-            }
-            else if (timestamp && multiplier) {
-                date = new Date(value * multiplier);
-            }
-            else {
-                date = new Date(value);
-            }
-
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
-        }
-
-        return null;
-    }
-
-    iso() {
-
-        if (this._flags.format === internals.isoDate) {
-            return this;
-        }
-
-        const obj = this.clone();
-        obj._flags.format = internals.isoDate;
-        return obj;
-    }
-
-    timestamp(type) {
-
-        type = type || 'javascript';
-
-        const allowed = ['javascript', 'unix'];
-        Hoek.assert(allowed.indexOf(type) !== -1, '"type" must be one of "' + allowed.join('", "') + '"');
-
-        if (this._flags.timestamp === type) {
-            return this;
-        }
-
-        const obj = this.clone();
-        obj._flags.timestamp = type;
-        obj._flags.multiplier = type === 'unix' ? 1000 : 1;
-        return obj;
-    }
-
-    _isIsoDate(value) {
-
-        return internals.isoDate.test(value);
-    }
-
-};
-
-internals.compare = function (type, compare) {
-
-    return function (date) {
-
-        const isNow = date === 'now';
-        const isRef = Ref.isRef(date);
-
-        if (!isNow && !isRef) {
-            date = internals.Date.toDate(date);
-        }
-
-        Hoek.assert(date, 'Invalid date format');
-
-        return this._test(type, date, function (value, state, options) {
-
-            let compareTo;
-            if (isNow) {
-                compareTo = Date.now();
-            }
-            else if (isRef) {
-                compareTo = internals.Date.toDate(date(state.reference || state.parent, options));
-
-                if (!compareTo) {
-                    return this.createError('date.ref', { ref: date.key }, state, options);
-                }
-
-                compareTo = compareTo.getTime();
-            }
-            else {
-                compareTo = date.getTime();
-            }
-
-            if (compare(value.getTime(), compareTo)) {
-                return value;
-            }
-
-            return this.createError('date.' + type, { limit: new Date(compareTo) }, state, options);
-        });
-    };
-};
-internals.Date.prototype.min = internals.compare('min', (value, date) => value >= date);
-internals.Date.prototype.max = internals.compare('max', (value, date) => value <= date);
-
-
-module.exports = new internals.Date();
-
-
-/***/ }),
+/* 847 */,
 /* 848 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -106492,202 +106707,10 @@ exports.default = fieldValidations;
 
 /***/ }),
 /* 856 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+module.exports = __webpack_require__(141);
 
-var isArray_1 = __webpack_require__(5);
-var isObject_1 = __webpack_require__(153);
-var isFunction_1 = __webpack_require__(442);
-var tryCatch_1 = __webpack_require__(362);
-var errorObject_1 = __webpack_require__(439);
-var UnsubscriptionError_1 = __webpack_require__(828);
-/**
- * Represents a disposable resource, such as the execution of an Observable. A
- * Subscription has one important method, `unsubscribe`, that takes no argument
- * and just disposes the resource held by the subscription.
- *
- * Additionally, subscriptions may be grouped together through the `add()`
- * method, which will attach a child Subscription to the current Subscription.
- * When a Subscription is unsubscribed, all its children (and its grandchildren)
- * will be unsubscribed as well.
- *
- * @class Subscription
- */
-var Subscription = (function () {
-    /**
-     * @param {function(): void} [unsubscribe] A function describing how to
-     * perform the disposal of resources when the `unsubscribe` method is called.
-     */
-    function Subscription(unsubscribe) {
-        /**
-         * A flag to indicate whether this Subscription has already been unsubscribed.
-         * @type {boolean}
-         */
-        this.closed = false;
-        this._parent = null;
-        this._parents = null;
-        this._subscriptions = null;
-        if (unsubscribe) {
-            this._unsubscribe = unsubscribe;
-        }
-    }
-    /**
-     * Disposes the resources held by the subscription. May, for instance, cancel
-     * an ongoing Observable execution or cancel any other type of work that
-     * started when the Subscription was created.
-     * @return {void}
-     */
-    Subscription.prototype.unsubscribe = function () {
-        var hasErrors = false;
-        var errors;
-        if (this.closed) {
-            return;
-        }
-        var _a = this, _parent = _a._parent, _parents = _a._parents, _unsubscribe = _a._unsubscribe, _subscriptions = _a._subscriptions;
-        this.closed = true;
-        this._parent = null;
-        this._parents = null;
-        // null out _subscriptions first so any child subscriptions that attempt
-        // to remove themselves from this subscription will noop
-        this._subscriptions = null;
-        var index = -1;
-        var len = _parents ? _parents.length : 0;
-        // if this._parent is null, then so is this._parents, and we
-        // don't have to remove ourselves from any parent subscriptions.
-        while (_parent) {
-            _parent.remove(this);
-            // if this._parents is null or index >= len,
-            // then _parent is set to null, and the loop exits
-            _parent = ++index < len && _parents[index] || null;
-        }
-        if (isFunction_1.isFunction(_unsubscribe)) {
-            var trial = tryCatch_1.tryCatch(_unsubscribe).call(this);
-            if (trial === errorObject_1.errorObject) {
-                hasErrors = true;
-                errors = errors || (errorObject_1.errorObject.e instanceof UnsubscriptionError_1.UnsubscriptionError ?
-                    flattenUnsubscriptionErrors(errorObject_1.errorObject.e.errors) : [errorObject_1.errorObject.e]);
-            }
-        }
-        if (isArray_1.isArray(_subscriptions)) {
-            index = -1;
-            len = _subscriptions.length;
-            while (++index < len) {
-                var sub = _subscriptions[index];
-                if (isObject_1.isObject(sub)) {
-                    var trial = tryCatch_1.tryCatch(sub.unsubscribe).call(sub);
-                    if (trial === errorObject_1.errorObject) {
-                        hasErrors = true;
-                        errors = errors || [];
-                        var err = errorObject_1.errorObject.e;
-                        if (err instanceof UnsubscriptionError_1.UnsubscriptionError) {
-                            errors = errors.concat(flattenUnsubscriptionErrors(err.errors));
-                        }
-                        else {
-                            errors.push(err);
-                        }
-                    }
-                }
-            }
-        }
-        if (hasErrors) {
-            throw new UnsubscriptionError_1.UnsubscriptionError(errors);
-        }
-    };
-    /**
-     * Adds a tear down to be called during the unsubscribe() of this
-     * Subscription.
-     *
-     * If the tear down being added is a subscription that is already
-     * unsubscribed, is the same reference `add` is being called on, or is
-     * `Subscription.EMPTY`, it will not be added.
-     *
-     * If this subscription is already in an `closed` state, the passed
-     * tear down logic will be executed immediately.
-     *
-     * @param {TeardownLogic} teardown The additional logic to execute on
-     * teardown.
-     * @return {Subscription} Returns the Subscription used or created to be
-     * added to the inner subscriptions list. This Subscription can be used with
-     * `remove()` to remove the passed teardown logic from the inner subscriptions
-     * list.
-     */
-    Subscription.prototype.add = function (teardown) {
-        if (!teardown || (teardown === Subscription.EMPTY)) {
-            return Subscription.EMPTY;
-        }
-        if (teardown === this) {
-            return this;
-        }
-        var subscription = teardown;
-        switch (typeof teardown) {
-            case 'function':
-                subscription = new Subscription(teardown);
-            case 'object':
-                if (subscription.closed || typeof subscription.unsubscribe !== 'function') {
-                    return subscription;
-                }
-                else if (this.closed) {
-                    subscription.unsubscribe();
-                    return subscription;
-                }
-                else if (typeof subscription._addParent !== 'function' /* quack quack */) {
-                    var tmp = subscription;
-                    subscription = new Subscription();
-                    subscription._subscriptions = [tmp];
-                }
-                break;
-            default:
-                throw new Error('unrecognized teardown ' + teardown + ' added to Subscription.');
-        }
-        var subscriptions = this._subscriptions || (this._subscriptions = []);
-        subscriptions.push(subscription);
-        subscription._addParent(this);
-        return subscription;
-    };
-    /**
-     * Removes a Subscription from the internal list of subscriptions that will
-     * unsubscribe during the unsubscribe process of this Subscription.
-     * @param {Subscription} subscription The subscription to remove.
-     * @return {void}
-     */
-    Subscription.prototype.remove = function (subscription) {
-        var subscriptions = this._subscriptions;
-        if (subscriptions) {
-            var subscriptionIndex = subscriptions.indexOf(subscription);
-            if (subscriptionIndex !== -1) {
-                subscriptions.splice(subscriptionIndex, 1);
-            }
-        }
-    };
-    Subscription.prototype._addParent = function (parent) {
-        var _a = this, _parent = _a._parent, _parents = _a._parents;
-        if (!_parent || _parent === parent) {
-            // If we don't have a parent, or the new parent is the same as the
-            // current parent, then set this._parent to the new parent.
-            this._parent = parent;
-        }
-        else if (!_parents) {
-            // If there's already one parent, but not multiple, allocate an Array to
-            // store the rest of the parent Subscriptions.
-            this._parents = [parent];
-        }
-        else if (_parents.indexOf(parent) === -1) {
-            // Only add the new parent to the _parents list if it's not already there.
-            _parents.push(parent);
-        }
-    };
-    Subscription.EMPTY = (function (empty) {
-        empty.closed = true;
-        return empty;
-    }(new Subscription()));
-    return Subscription;
-}());
-exports.Subscription = Subscription;
-function flattenUnsubscriptionErrors(errors) {
-    return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError_1.UnsubscriptionError) ? err.errors : err); }, []);
-}
-//# sourceMappingURL=Subscription.js.map
 
 /***/ }),
 /* 857 */,
@@ -108424,7 +108447,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Observable_1 = __webpack_require__(336);
 var Subscriber_1 = __webpack_require__(83);
-var Subscription_1 = __webpack_require__(856);
+var Subscription_1 = __webpack_require__(126);
 var ObjectUnsubscribedError_1 = __webpack_require__(715);
 var SubjectSubscription_1 = __webpack_require__(209);
 var rxSubscriber_1 = __webpack_require__(198);
@@ -110814,7 +110837,7 @@ module.exports = [["8740","䏰䰲䘃䖦䕸𧉧䵷䖳𧲱䳢𧳅㮕䜶䝄䱇䱀�
 
 "use strict";
 
-const {PassThrough} = __webpack_require__(794);
+const {PassThrough} = __webpack_require__(413);
 
 module.exports = options => {
 	options = Object.assign({}, options);
@@ -112518,7 +112541,7 @@ const Hoek = __webpack_require__(970);
 let Isemail;                            // Loaded on demand
 const Any = __webpack_require__(991);
 const Ref = __webpack_require__(953);
-const JoiDate = __webpack_require__(847);
+const JoiDate = __webpack_require__(794);
 const Uri = __webpack_require__(337);
 const Ip = __webpack_require__(861);
 

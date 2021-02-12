@@ -2,9 +2,9 @@ name: "Contentful Migration Automation"
 description: "Fully automated and configurable migrations against a contentful space"
 inputs:
   delete_feature:
-    description: "Should the head branch be deleted after it was merged?"
+    description: "The head branch will be deleted after it was merged"
   set_alias:
-    description: "Should the master be aliased to the new master?"
+    description: "The master will be aliased to the new master"
   master_pattern:
     description: "The pattern that should be used for the new master"
   feature_pattern:
@@ -15,6 +15,11 @@ inputs:
     description: "The field that caries the version number"
   migrations_dir:
     description: "The directory to look for migrations"
+  space_id:
+    description: "The id of the contentful space"
+  management_api_key:
+    description: "The management-api key for contentful"
+
 outputs:
   environment_url:
     description: "Contentful environment URL"
