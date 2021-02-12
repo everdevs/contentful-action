@@ -1,16 +1,12 @@
 {
-  "name": "javascript-action",
+  "name": "contentful-migrations-action",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
-  "main": "index.js",
+  "description": "JavaScript Action for Contentful migrations",
+  "main": "src/index.ts",
   "scripts": {
-    "lint": "eslint index.js",
-    "package": "ncc build index.js -o dist",
-    "test": "eslint index.js && jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "lint": "eslint src/index.ts",
+    "package": "ncc build src/index.ts -o dist",
+    "test": "eslint src/index.ts && jest"
   },
   "keywords": [
     "GitHub",
@@ -20,18 +16,17 @@
   ],
   "author": "GitHub",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
-  },
-  "homepage": "https://github.com/actions/javascript-action#readme",
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^3.0.0",
     "contentful-management": "^6.2.0-beta0",
-    "contentful-migration": "^0.17.1-beta0"
+    "contentful-migration": "^0.17.1-beta0",
+    "tslib": "^2.1.0"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.5",
     "eslint": "^6.3.0",
     "jest": "^24.9.0"
   }
