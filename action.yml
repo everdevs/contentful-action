@@ -12,7 +12,7 @@ inputs:
   version_content_type:
     description: "The content-type that tracks the version"
   version_field:
-    description: "The field that caries the version number"
+    description: "The field that carries the version number"
   migrations_dir:
     description: "The directory to look for migrations"
   space_id:
