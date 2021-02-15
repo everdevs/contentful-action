@@ -14,6 +14,17 @@ export const {
   INPUT_VERSION_FIELD,
 } = process.env;
 
+const booleanOr = (str: string, fallback: boolean): boolean => {
+  switch (str) {
+    case "true":
+      return true;
+    case "false":
+      return false;
+    default:
+      return fallback;
+  }
+};
+
 export const DEFAULT_MIGRATIONS_DIR = "migrations";
 export const DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mm][ss]";
 export const DEFAULT_FEATURE_PATTERN = "GH-[branch]";
@@ -27,13 +38,11 @@ export const VERSION_CONTENT_TYPE =
 export const FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
 export const MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
 export const VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
-export const DELETE_FEATURE =
-  typeof INPUT_DELETE_FEATURE === "boolean"
-    ? INPUT_DELETE_FEATURE
-    : DEFAULT_DELETE_FEATURE;
-export const SET_ALIAS =
-  typeof INPUT_SET_ALIAS === "boolean" ? INPUT_SET_ALIAS : DEFAULT_SET_ALIAS;
-
+export const DELETE_FEATURE = booleanOr(
+  INPUT_DELETE_FEATURE,
+  DEFAULT_DELETE_FEATURE
+);
+export const SET_ALIAS = booleanOr(INPUT_SET_ALIAS, DEFAULT_SET_ALIAS);
 export const MIGRATIONS_DIR = path.join(
   GITHUB_WORKSPACE,
   INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR

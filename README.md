@@ -79,6 +79,10 @@ manually set the alias from the GUI.
 
 Please read the usage info above. The content-type and the field-id are configurable. 
 
+## LOG_LEVEL
+
+If you want to see more logs you can set your `LOG_LEVEL` to `verbose`. (See example workflow below)
+
 ## Arguments
 
 Name | Type | Required | Default  | Description
@@ -112,6 +116,8 @@ Please look at the [demo file](.github/workflows/main.yml).
     # migrations_dir: contentful/migrations
     space_id: ${{ secrets.SPACE_ID }}
     management_api_key: ${{ secrets.MANAGEMENT_API_KEY }}
+  # env:
+    # LOG_LEVEL: verbose
 ```
 
 # License
