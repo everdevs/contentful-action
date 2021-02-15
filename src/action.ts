@@ -14,12 +14,14 @@ import {
   SPACE_ID,
   VERSION_CONTENT_TYPE,
   VERSION_FIELD,
+  FEATURE_PATTERN,
 } from "./constants";
 import {
   delay,
   filenameToVersion,
   getBranchNames,
   getEnvironment,
+  getNameFromPattern,
   Logger,
   versionToFilename,
 } from "./utils";
@@ -192,7 +194,9 @@ export const runAction = async (space): Promise<void> => {
     github.context.payload.pull_request?.merged
   ) {
     try {
-      const { head: environmentIdToDelete } = environmentNames;
+      const environmentIdToDelete = getNameFromPattern(FEATURE_PATTERN, {
+        branchName: branchNames.headRef,
+      });
       Logger.log(`Delete the environment: ${environmentIdToDelete}`);
       const environment = await space.getEnvironment(environmentIdToDelete);
       await environment?.delete();

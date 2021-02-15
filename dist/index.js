@@ -96519,7 +96519,9 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 _c.label = 19;
             case 19:
                 _c.trys.push([19, 22, , 23]);
-                environmentIdToDelete = environmentNames.head;
+                environmentIdToDelete = getNameFromPattern(FEATURE_PATTERN, {
+                    branchName: branchNames.headRef,
+                });
                 Logger.log("Delete the environment: " + environmentIdToDelete);
                 return [4 /*yield*/, space.getEnvironment(environmentIdToDelete)];
             case 20:
