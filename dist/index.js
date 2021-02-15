@@ -96125,7 +96125,7 @@ var external_util_ = __webpack_require__(669);
 // CONCATENATED MODULE: ./src/constants.ts
 var constants_a;
 
-var GITHUB_WORKSPACE = (constants_a = process.env, constants_a.GITHUB_WORKSPACE), SPACE_ID = constants_a.INPUT_SPACE_ID, MANAGEMENT_API_KEY = constants_a.INPUT_MANAGEMENT_API_KEY, INPUT_MIGRATIONS_DIR = constants_a.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = constants_a.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = constants_a.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = constants_a.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = constants_a.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = constants_a.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = constants_a.INPUT_VERSION_FIELD;
+var GITHUB_WORKSPACE = (constants_a = process.env, constants_a.GITHUB_WORKSPACE), LOG_LEVEL = constants_a.LOG_LEVEL, SPACE_ID = constants_a.INPUT_SPACE_ID, MANAGEMENT_API_KEY = constants_a.INPUT_MANAGEMENT_API_KEY, INPUT_MIGRATIONS_DIR = constants_a.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = constants_a.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = constants_a.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = constants_a.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = constants_a.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = constants_a.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = constants_a.INPUT_VERSION_FIELD;
 var DEFAULT_MIGRATIONS_DIR = "migrations";
 var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mm][ss]";
 var DEFAULT_FEATURE_PATTERN = "GH-[branch]";
@@ -96175,6 +96175,11 @@ var Logger = {
     },
     warn: function (message) {
         console.log("⚠️", source_default().yellow(message));
+    },
+    verbose: function (message) {
+        if (LOG_LEVEL === "verbose") {
+            console.log(source_default().white(message));
+        }
     },
 };
 /**
@@ -96310,13 +96315,13 @@ var getEnvironment = function (space, branchNames) { return Object(tslib.__await
                 // If the Pull Request is merged and the base is the repository default_name (master|main, ...)
                 // Then create an environment name for the given master_pattern
                 // Else create an environment name for the given feature_pattern
-                Logger.log("MASTER_PATTERN: " + MASTER_PATTERN + " | FEATURE_PATTERN: " + FEATURE_PATTERN);
+                Logger.verbose("MASTER_PATTERN: " + MASTER_PATTERN + " | FEATURE_PATTERN: " + FEATURE_PATTERN);
                 environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
                     ? getNameFromPattern(MASTER_PATTERN)
                     : getNameFromPattern(FEATURE_PATTERN, {
                         branchName: branchNames.headRef,
                     });
-                Logger.log("environmentId: \"" + environmentId + "\"");
+                Logger.verbose("environmentId: \"" + environmentId + "\"");
                 if (!(environmentId === CONTENTFUL_ALIAS)) return [3 /*break*/, 2];
                 _a = {
                     environmentNames: environmentNames,
@@ -96406,7 +96411,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 count++;
                 return [3 /*break*/, 2];
             case 5:
-                Logger.log("Update API Keys to allow access to new environment");
+                Logger.verbose("Update API Keys to allow access to new environment");
                 newEnv = {
                     sys: {
                         type: "Link",
@@ -96418,17 +96423,17 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
             case 6:
                 keys = (_c.sent()).items;
                 return [4 /*yield*/, Promise.all(keys.map(function (key) {
-                        Logger.log("Updating: \"" + key.sys.id + "\"");
+                        Logger.verbose("Updating: \"" + key.sys.id + "\"");
                         key.environments.push(newEnv);
                         return key.update();
                     }))];
             case 7:
                 _c.sent();
-                Logger.log("Set default locale to new environment");
+                Logger.verbose("Set default locale to new environment");
                 return [4 /*yield*/, environment.getLocales()];
             case 8:
                 defaultLocale = (_c.sent()).items.find(function (locale) { return locale.default; }).code;
-                Logger.log("Read all the available migrations from the file system");
+                Logger.verbose("Read all the available migrations from the file system");
                 return [4 /*yield*/, readdirAsync(MIGRATIONS_DIR)];
             case 9:
                 availableMigrations = (_c.sent())
@@ -96436,7 +96441,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                     .map(function (file) { return filenameToVersion(file); })
                     .sort(function (a, b) { return a - b; })
                     .map(function (num) { return "" + num; });
-                Logger.log("Find current version of the contentful space");
+                Logger.verbose("Find current version of the contentful space");
                 return [4 /*yield*/, environment.getEntries({
                         content_type: VERSION_CONTENT_TYPE,
                     })];
@@ -96452,7 +96457,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 }
                 storedVersionEntry = versions[0];
                 currentVersionString = storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
-                Logger.log("Evaluate which migrations to run");
+                Logger.verbose("Evaluate which migrations to run");
                 currentMigrationIndex = availableMigrations.indexOf(currentVersionString);
                 // If the migration can't be found
                 // Then abort
@@ -96466,13 +96471,13 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                     accessToken: MANAGEMENT_API_KEY,
                     yes: true,
                 };
-                Logger.log("Run migrations and update version entry");
+                Logger.verbose("Run migrations and update version entry");
                 mutableStoredVersionEntry = storedVersionEntry;
                 _c.label = 11;
             case 11:
                 if (!(migrationToRun = migrationsToRun.shift())) return [3 /*break*/, 15];
                 filePath = external_path_default().join(MIGRATIONS_DIR, versionToFilename(migrationToRun));
-                Logger.log("Running " + filePath);
+                Logger.verbose("Running " + filePath);
                 return [4 /*yield*/, Object(cli.runMigration)(Object.assign(migrationOptions, {
                         filePath: filePath,
                     }))];
@@ -96505,8 +96510,8 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 _c.sent();
                 return [3 /*break*/, 18];
             case 17:
-                Logger.log("Running on feature branch");
-                Logger.log("No alias changes required");
+                Logger.verbose("Running on feature branch");
+                Logger.verbose("No alias changes required");
                 _c.label = 18;
             case 18:
                 if (!(DELETE_FEATURE &&

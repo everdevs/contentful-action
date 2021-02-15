@@ -6,6 +6,7 @@ import {
   DELAY,
   FEATURE_PATTERN,
   MASTER_PATTERN,
+  LOG_LEVEL,
 } from "./constants";
 import { BranchNames, EnvironmentProps, EventNames } from "./types";
 
@@ -24,6 +25,11 @@ export const Logger = {
   },
   warn(message) {
     console.log("⚠️", chalk.yellow(message));
+  },
+  verbose(message) {
+    if (LOG_LEVEL === "verbose") {
+      console.log(chalk.white(message));
+    }
   },
 };
 
@@ -164,7 +170,7 @@ export const getEnvironment = async (
   // If the Pull Request is merged and the base is the repository default_name (master|main, ...)
   // Then create an environment name for the given master_pattern
   // Else create an environment name for the given feature_pattern
-  Logger.log(
+  Logger.verbose(
     `MASTER_PATTERN: ${MASTER_PATTERN} | FEATURE_PATTERN: ${FEATURE_PATTERN}`
   );
   const environmentId =
@@ -174,7 +180,7 @@ export const getEnvironment = async (
       : getNameFromPattern(FEATURE_PATTERN, {
           branchName: branchNames.headRef,
         });
-  Logger.log(`environmentId: "${environmentId}"`);
+  Logger.verbose(`environmentId: "${environmentId}"`);
 
   // If environment matches ${CONTENTFUL_ALIAS} ("master")
   // Then return it without further actions

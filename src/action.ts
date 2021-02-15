@@ -60,7 +60,7 @@ export const runAction = async (space): Promise<void> => {
     count++;
   }
 
-  Logger.log("Update API Keys to allow access to new environment");
+  Logger.verbose("Update API Keys to allow access to new environment");
   const newEnv = {
     sys: {
       type: "Link",
@@ -72,18 +72,18 @@ export const runAction = async (space): Promise<void> => {
   const { items: keys } = await space.getApiKeys();
   await Promise.all(
     keys.map((key) => {
-      Logger.log(`Updating: "${key.sys.id}"`);
+      Logger.verbose(`Updating: "${key.sys.id}"`);
       key.environments.push(newEnv);
       return key.update();
     })
   );
 
-  Logger.log("Set default locale to new environment");
+  Logger.verbose("Set default locale to new environment");
   const defaultLocale = (await environment.getLocales()).items.find(
     (locale) => locale.default
   ).code;
 
-  Logger.log("Read all the available migrations from the file system");
+  Logger.verbose("Read all the available migrations from the file system");
   // Check for available migrations
   // Migration scripts need to be sorted in order to run without conflicts
   const availableMigrations = (await readdirAsync(MIGRATIONS_DIR))
@@ -92,7 +92,7 @@ export const runAction = async (space): Promise<void> => {
     .sort((a, b) => a - b)
     .map((num) => `${num}`);
 
-  Logger.log("Find current version of the contentful space");
+  Logger.verbose("Find current version of the contentful space");
   const { items: versions } = await environment.getEntries({
     content_type: VERSION_CONTENT_TYPE,
   });
@@ -115,7 +115,7 @@ export const runAction = async (space): Promise<void> => {
   const currentVersionString =
     storedVersionEntry.fields[VERSION_FIELD][defaultLocale];
 
-  Logger.log("Evaluate which migrations to run");
+  Logger.verbose("Evaluate which migrations to run");
   const currentMigrationIndex = availableMigrations.indexOf(
     currentVersionString
   );
@@ -136,7 +136,7 @@ export const runAction = async (space): Promise<void> => {
     yes: true,
   };
 
-  Logger.log("Run migrations and update version entry");
+  Logger.verbose("Run migrations and update version entry");
   // Allow mutations
   let migrationToRun;
   let mutableStoredVersionEntry = storedVersionEntry;
@@ -145,7 +145,7 @@ export const runAction = async (space): Promise<void> => {
       MIGRATIONS_DIR,
       versionToFilename(migrationToRun)
     );
-    Logger.log(`Running ${filePath}`);
+    Logger.verbose(`Running ${filePath}`);
     await runMigration(
       Object.assign(migrationOptions, {
         filePath,
@@ -178,8 +178,8 @@ export const runAction = async (space): Promise<void> => {
       .then((alias) => Logger.success(`alias ${alias.sys.id} updated.`))
       .catch(Logger.error);
   } else {
-    Logger.log("Running on feature branch");
-    Logger.log("No alias changes required");
+    Logger.verbose("Running on feature branch");
+    Logger.verbose("No alias changes required");
   }
 
   // If the sandbox environment should be deleted

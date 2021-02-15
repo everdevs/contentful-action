@@ -5,6 +5,7 @@ export declare const Logger: {
     success(message: any): void;
     error(message: any): void;
     warn(message: any): void;
+    verbose(message: any): void;
 };
 /**
  * Promise based delay
