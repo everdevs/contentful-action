@@ -95,6 +95,9 @@ migrations_dir           | `string`  | No  | `migrations` | The directory to loo
 
 
 ## Workflow
+
+Please look at the [demo file](.github/workflows/main.yml).
+
 ```yml
 - name: Contentful Migration
   id: migrate

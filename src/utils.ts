@@ -31,7 +31,7 @@ export const Logger = {
  * Promise based delay
  * @param time
  */
-export const delay = (time = DELAY) =>
+export const delay = (time = DELAY): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, time));
 
 /**
@@ -39,7 +39,7 @@ export const delay = (time = DELAY) =>
  * @example
  * filenameToVersion("1.js") // 1
  */
-export const filenameToVersion = (file) =>
+export const filenameToVersion = (file: string): number =>
   parseInt(file.replace(/\.js$/, "").replace(/_/g, "."), 10);
 
 /**
@@ -47,14 +47,14 @@ export const filenameToVersion = (file) =>
  * @example
  * versionToFilename(1) // 1.js
  */
-export const versionToFilename = (version: string) =>
+export const versionToFilename = (version: string): string =>
   version.replace(/\./g, "_") + ".js";
 
 /**
  * Convert a branchName to a valid environmentName
  * @param branchName
  */
-export const branchNameToEnvironmentName = (branchName: string) =>
+export const branchNameToEnvironmentName = (branchName: string): string =>
   branchName.replace(/[\/_.]/g, "-");
 
 export enum Matcher {
@@ -69,14 +69,19 @@ export enum Matcher {
 }
 
 export const matchers = {
-  [Matcher.ss]: (date) => `${date.getUTCSeconds()}`.padStart(2, "0"),
-  [Matcher.hh]: (date) => `${date.getUTCHours()}`.padStart(2, "0"),
-  [Matcher.mm]: (date) => `${date.getUTCMinutes()}`.padStart(2, "0"),
-  [Matcher.YYYY]: (date) => `${date.getUTCFullYear()}`,
-  [Matcher.YY]: (date) => `${date.getUTCFullYear()}`.substr(2, 2),
-  [Matcher.MM]: (date) => `${date.getUTCMonth() + 1}`.padStart(2, "0"),
-  [Matcher.DD]: (date) => `${date.getDate()}`.padStart(2, "0"),
-  [Matcher.branch]: (branchName) => branchNameToEnvironmentName(branchName),
+  [Matcher.ss]: (date: Date): string =>
+    `${date.getUTCSeconds()}`.padStart(2, "0"),
+  [Matcher.hh]: (date: Date): string =>
+    `${date.getUTCHours()}`.padStart(2, "0"),
+  [Matcher.mm]: (date: Date): string =>
+    `${date.getUTCMinutes()}`.padStart(2, "0"),
+  [Matcher.YYYY]: (date: Date): string => `${date.getUTCFullYear()}`,
+  [Matcher.YY]: (date: Date): string => `${date.getUTCFullYear()}`.substr(2, 2),
+  [Matcher.MM]: (date: Date): string =>
+    `${date.getUTCMonth() + 1}`.padStart(2, "0"),
+  [Matcher.DD]: (date: Date): string => `${date.getDate()}`.padStart(2, "0"),
+  [Matcher.branch]: (branchName: string): string =>
+    branchNameToEnvironmentName(branchName),
 };
 
 export interface NameToPatternArgs {
@@ -91,7 +96,7 @@ export interface NameToPatternArgs {
 export const getNameFromPattern = (
   pattern: string,
   { branchName }: NameToPatternArgs = {}
-) => {
+): string => {
   const date = new Date();
   return pattern.replace(
     /\[(YYYY|YY|MM|DD|hh|mm|ss|branch)]/g,
