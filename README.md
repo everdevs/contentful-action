@@ -20,7 +20,7 @@ An action for automating contentful migrations.
 
 ## Usage
 
-This action runs migrations on your contentful space. PLease add your migration scripts to a directory called
+This action runs migrations on your contentful space. Please add your migration scripts to a directory called
 `migrations` *(configurable)* and name them `[n].js` where `[n]` is the current version of your content-model.
 Versions are integers (`1.js`, `2.js`, ...)
 
@@ -36,7 +36,7 @@ module.exports = function () {};
 For every new version we can now increase the version (`2.js`, `3.js`, ...). Per default, this action looks for a
 directory labeled `migrations` but it's configurable via the arg `migrations_dir`.
 
-Next we can adjust our workflow file to use this action. YOu have to include your `space_id` and `management_api_key`
+Next we can adjust our workflow file to use this action. You have to include your `space_id` and `management_api_key`
 from your Contentful space.
 
 There are several options to allow customizing this action.
@@ -86,7 +86,7 @@ Name | Type | Required | Default  | Description
 **space_id**             | `string`  | Yes | `undefined` | The id of the contentful space
 **management_api_key**   | `string`  | Yes | `undefined` | The management-api key for contentful
 delete_feature           | `boolean` | No  | `false` | Deletes sandbox environment if the head branch is merged
-set_alias                | `boolean` | No  | `false` | Aliases master the new master environment
+set_alias                | `boolean` | No  | `false` | Aliases master to the new master environment
 master_pattern           | `string`  | No  | `master-[YYYY]-[MM]-[DD]-[hh][mm]` | The pattern that should be used for the new master
 feature_pattern          | `string`  | No  | `GH-[branch]` | The pattern that should be used for the new feature
 version_content_type     | `string`  | No  | `versionTracking` | The content-type that tracks the version
