@@ -6,8 +6,8 @@ import path from "path";
 import { promisify } from "util";
 import {
   CONTENTFUL_ALIAS,
-  INPUT_DELETE_FEATURE,
-  INPUT_SET_ALIAS,
+  DELETE_FEATURE,
+  SET_ALIAS,
   MANAGEMENT_API_KEY,
   MAX_NUMBER_OF_TRIES,
   MIGRATIONS_DIR,
@@ -167,7 +167,7 @@ export const runAction = async (space): Promise<void> => {
   // If the environmentId starts with ${CONTENTFUL_ALIAS} ("master")
   // Then set the alias to the new environment
   // Else inform the user
-  if (environmentId.startsWith(CONTENTFUL_ALIAS) && INPUT_SET_ALIAS) {
+  if (environmentId.startsWith(CONTENTFUL_ALIAS) && SET_ALIAS) {
     Logger.log(`Running on ${CONTENTFUL_ALIAS}.`);
     Logger.log(`Updating ${CONTENTFUL_ALIAS} alias.`);
     await space
@@ -188,12 +188,12 @@ export const runAction = async (space): Promise<void> => {
   // And the Pull Request has been merged
   // Then delete the sandbox environment
   if (
-    INPUT_DELETE_FEATURE &&
+    DELETE_FEATURE &&
     branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged
   ) {
     try {
-      const environmentIdToDelete = `GH-${environmentNames.head}`;
+      const {head: environmentIdToDelete} = environmentNames;
       Logger.log(`Delete the environment: ${environmentIdToDelete}`);
       const environment = await space.getEnvironment(environmentIdToDelete);
       await environment?.delete();
