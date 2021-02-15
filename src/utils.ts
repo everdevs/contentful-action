@@ -164,6 +164,9 @@ export const getEnvironment = async (
   // If the Pull Request is merged and the base is the repository default_name (master|main, ...)
   // Then create an environment name for the given master_pattern
   // Else create an environment name for the given feature_pattern
+  Logger.log(
+    `MASTER_PATTERN: ${MASTER_PATTERN} | FEATURE_PATTERN: ${FEATURE_PATTERN}`
+  );
   const environmentId =
     branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged

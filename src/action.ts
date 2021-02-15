@@ -36,10 +36,12 @@ export const runAction = async (space): Promise<void> => {
     space,
     branchNames
   );
+  Logger.log(
+    JSON.stringify({ environmentId, environment, environmentNames }, null, 4)
+  );
 
   // Counter to limit retries
   let count = 0;
-
   Logger.log("Waiting for environment processing...");
   while (count < MAX_NUMBER_OF_TRIES) {
     const status = (await space.getEnvironment(environment.sys.id)).sys.status
@@ -193,7 +195,7 @@ export const runAction = async (space): Promise<void> => {
     github.context.payload.pull_request?.merged
   ) {
     try {
-      const {head: environmentIdToDelete} = environmentNames;
+      const { head: environmentIdToDelete } = environmentNames;
       Logger.log(`Delete the environment: ${environmentIdToDelete}`);
       const environment = await space.getEnvironment(environmentIdToDelete);
       await environment?.delete();
