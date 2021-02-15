@@ -96127,16 +96127,20 @@ var constants_a;
 
 var GITHUB_WORKSPACE = (constants_a = process.env, constants_a.GITHUB_WORKSPACE), SPACE_ID = constants_a.INPUT_SPACE_ID, MANAGEMENT_API_KEY = constants_a.INPUT_MANAGEMENT_API_KEY, INPUT_MIGRATIONS_DIR = constants_a.INPUT_MIGRATIONS_DIR, INPUT_DELETE_FEATURE = constants_a.INPUT_DELETE_FEATURE, INPUT_SET_ALIAS = constants_a.INPUT_SET_ALIAS, INPUT_FEATURE_PATTERN = constants_a.INPUT_FEATURE_PATTERN, INPUT_MASTER_PATTERN = constants_a.INPUT_MASTER_PATTERN, INPUT_VERSION_CONTENT_TYPE = constants_a.INPUT_VERSION_CONTENT_TYPE, INPUT_VERSION_FIELD = constants_a.INPUT_VERSION_FIELD;
 var DEFAULT_MIGRATIONS_DIR = "migrations";
-var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mmss]";
+var DEFAULT_MASTER_PATTERN = "master-[YYYY]-[MM]-[DD]-[mm][ss]";
 var DEFAULT_FEATURE_PATTERN = "GH-[branch]";
 var DEFAULT_VERSION_CONTENT_TYPE = "versionTracking";
 var DEFAULT_VERSION_FIELD = "version";
+var DEFAULT_DELETE_FEATURE = false;
+var DEFAULT_SET_ALIAS = false;
 var VERSION_CONTENT_TYPE = INPUT_VERSION_CONTENT_TYPE || DEFAULT_VERSION_CONTENT_TYPE;
 var FEATURE_PATTERN = INPUT_FEATURE_PATTERN || DEFAULT_FEATURE_PATTERN;
 var MASTER_PATTERN = INPUT_MASTER_PATTERN || DEFAULT_MASTER_PATTERN;
 var VERSION_FIELD = INPUT_VERSION_FIELD || DEFAULT_VERSION_FIELD;
+var DELETE_FEATURE = INPUT_DELETE_FEATURE || DEFAULT_DELETE_FEATURE;
+var SET_ALIAS = INPUT_SET_ALIAS || DEFAULT_SET_ALIAS;
 var MIGRATIONS_DIR = external_path_default().join(GITHUB_WORKSPACE, INPUT_MIGRATIONS_DIR || DEFAULT_MIGRATIONS_DIR);
-var CONTENTFUL_MASTER = "master";
+var CONTENTFUL_ALIAS = "master";
 var DELAY = 3000;
 var MAX_NUMBER_OF_TRIES = 10;
 
@@ -96216,14 +96220,24 @@ var Matcher;
     Matcher["branch"] = "branch";
 })(Matcher || (Matcher = {}));
 var matchers = (utils_a = {},
-    utils_a[Matcher.ss] = function (date) { return ("" + date.getUTCSeconds()).padStart(2, "0"); },
-    utils_a[Matcher.hh] = function (date) { return ("" + date.getUTCHours()).padStart(2, "0"); },
-    utils_a[Matcher.mm] = function (date) { return ("" + date.getUTCMinutes()).padStart(2, "0"); },
+    utils_a[Matcher.ss] = function (date) {
+        return ("" + date.getUTCSeconds()).padStart(2, "0");
+    },
+    utils_a[Matcher.hh] = function (date) {
+        return ("" + date.getUTCHours()).padStart(2, "0");
+    },
+    utils_a[Matcher.mm] = function (date) {
+        return ("" + date.getUTCMinutes()).padStart(2, "0");
+    },
     utils_a[Matcher.YYYY] = function (date) { return "" + date.getUTCFullYear(); },
     utils_a[Matcher.YY] = function (date) { return ("" + date.getUTCFullYear()).substr(2, 2); },
-    utils_a[Matcher.MM] = function (date) { return ("" + (date.getUTCMonth() + 1)).padStart(2, "0"); },
+    utils_a[Matcher.MM] = function (date) {
+        return ("" + (date.getUTCMonth() + 1)).padStart(2, "0");
+    },
     utils_a[Matcher.DD] = function (date) { return ("" + date.getDate()).padStart(2, "0"); },
-    utils_a[Matcher.branch] = function (branchName) { return branchNameToEnvironmentName(branchName); },
+    utils_a[Matcher.branch] = function (branchName) {
+        return branchNameToEnvironmentName(branchName);
+    },
     utils_a);
 /**
  *
@@ -96293,13 +96307,17 @@ var getEnvironment = function (space, branchNames) { return Object(tslib.__await
                         ? branchNameToEnvironmentName(branchNames.headRef)
                         : null,
                 };
+                // If the Pull Request is merged and the base is the repository default_name (master|main, ...)
+                // Then create an environment name for the given master_pattern
+                // Else create an environment name for the given feature_pattern
+                Logger.log("MASTER_PATTERN: " + MASTER_PATTERN + " | FEATURE_PATTERN: " + FEATURE_PATTERN);
                 environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
                     ? getNameFromPattern(MASTER_PATTERN)
                     : getNameFromPattern(FEATURE_PATTERN, {
                         branchName: branchNames.headRef,
                     });
                 Logger.log("environmentId: \"" + environmentId + "\"");
-                if (!(environmentId === CONTENTFUL_MASTER)) return [3 /*break*/, 2];
+                if (!(environmentId === CONTENTFUL_ALIAS)) return [3 /*break*/, 2];
                 _a = {
                     environmentNames: environmentNames,
                     environmentId: environmentId
@@ -96471,12 +96489,12 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 Logger.success("Updated field " + VERSION_FIELD + " in " + VERSION_CONTENT_TYPE + " entry to " + migrationToRun);
                 return [3 /*break*/, 11];
             case 15:
-                Logger.log("Checking if we need to update master alias");
-                if (!(environmentId.startsWith(CONTENTFUL_MASTER) && INPUT_SET_ALIAS)) return [3 /*break*/, 17];
-                Logger.log("Running on master.");
-                Logger.log("Updating master alias.");
+                Logger.log("Checking if we need to update " + CONTENTFUL_ALIAS + " alias");
+                if (!(environmentId.startsWith(CONTENTFUL_ALIAS) && SET_ALIAS)) return [3 /*break*/, 17];
+                Logger.log("Running on " + CONTENTFUL_ALIAS + ".");
+                Logger.log("Updating " + CONTENTFUL_ALIAS + " alias.");
                 return [4 /*yield*/, space
-                        .getEnvironmentAlias("master")
+                        .getEnvironmentAlias(CONTENTFUL_ALIAS)
                         .then(function (alias) {
                         alias.environment.sys.id = environmentId;
                         return alias.update();
@@ -96491,12 +96509,12 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 Logger.log("No alias changes required");
                 _c.label = 18;
             case 18:
-                if (!(INPUT_DELETE_FEATURE &&
+                if (!(DELETE_FEATURE &&
                     branchNames.baseRef === branchNames.defaultBranch && ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged))) return [3 /*break*/, 23];
                 _c.label = 19;
             case 19:
                 _c.trys.push([19, 22, , 23]);
-                environmentIdToDelete = "GH-" + environmentNames.head;
+                environmentIdToDelete = environmentNames.head;
                 Logger.log("Delete the environment: " + environmentIdToDelete);
                 return [4 /*yield*/, space.getEnvironment(environmentIdToDelete)];
             case 20:

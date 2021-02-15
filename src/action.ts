@@ -36,9 +36,6 @@ export const runAction = async (space): Promise<void> => {
     space,
     branchNames
   );
-  Logger.log(
-    JSON.stringify({ environmentId, environment, environmentNames }, null, 4)
-  );
 
   // Counter to limit retries
   let count = 0;
