@@ -2,11 +2,12 @@
 
 An action for automating contentful migrations.
 
-To learn about making changes to a content model and entries on a Contentful Space using the Contentful CLI check out
-the [tutorial on Scripting Migrations](https://www.contentful.com/developers/docs/tutorials/cli/scripting-migrations/).
-You can read our [conceptual guide](https://www.contentful.com/developers/docs/concepts/deployment-pipeline/) on how to
-utilize Contentful Environments inside your continuous delivery pipeline.
-
+> To learn about making changes to a content model and entries on a Contentful Space using the Contentful CLI check out
+> our [tutorial on Scripting Migrations](https://www.contentful.com/developers/docs/tutorials/cli/scripting-migrations/).
+> You can read our [conceptual guide](https://www.contentful.com/developers/docs/concepts/deployment-pipeline/) on how to
+> utilize Contentful Environments inside your continuous delivery pipeline.
+> 
+> - via [contentful/contentful-action](https://github.com/contentful/contentful-action)
 
 * [Usage](#usage)
 * [Environment names](#environment-names)
@@ -19,45 +20,43 @@ utilize Contentful Environments inside your continuous delivery pipeline.
 
 ## Usage
 
-This action requires a folder labeled `migrations` *(configurable)* inside your repo. You should place all your migrations
-in this directory.
-
-For this action to know which migrations it should run, we’ll need to track which migrations have been run by adding a
-version number into Contentful. We accomplish this in Contentful by creating a new content model with an ID of
-`versionTracking` *(configurable)* that has a single short-text-field named `version` *(configurable)*.
+This action runs migrations on your contentful space. PLease add your migration scripts to a directory called
+`migrations` *(configurable)* and name them `[n].js` where `[n]` is the current version of your content-model.
+Versions are integers (`1.js`, `2.js`, ...)
 
 ![Screenshot of Contentful Version Tracking Entry](images/version-tracking.png)
 
-You’ll also need to create one entry of your new content model with the value `1`. We’ll need to create an empty
-migration file to represent the initial import. Create `1.js` inside your migration folder and include the following
-code:
+You can choose the initial version. For simplicity, we recommend to start with `1`. Please create `1.js` inside your
+migrations folder and include the following code:
 
 ```js
 module.exports = function () {};
 ```
 
-Going forward you can create a JavaScript file with an increasing integer such as `2.js`, `3.js` and so on. The action
-looks for a folder labeled `migrations` but it's configurable via the arg `migrations_dir`.
+For every new version we can now increase the version (`2.js`, `3.js`, ...). Per default, this action looks for a
+directory labeled `migrations` but it's configurable via the arg `migrations_dir`.
 
-Lastly you'll need to update your workflow file to use this action and update the settings to include your `space_id`
-and `management_api_key` from Contentful.
+Next we can adjust our workflow file to use this action. YOu have to include your `space_id` and `management_api_key`
+from your Contentful space.
 
 There are several options to allow customizing this action.
 
 ## Environment names
-You can define the `master_pattern` and `feature_pattern` where the master is used as alias target while the feature is
-used as a sandbox.
 
-You can define the pattern by using these helpers:
+You can define the `master_pattern` and `feature_pattern`.
+**Master** is used as alias target.
+**Feature** is used as a sandbox during development.
 
-- `[YYYY]`: full year (i.e. 2021)
-- `[YY]`: short year (i.e. 21)
-- `[MM]`: month (i.e. 05)
-- `[DD]`: Day (i.e. 09)
-- `[hh]`: hours (i.e. 03)
-- `[mm]`: minutes (i.e. 00)
-- `[ss]`: seconds (i.e. 50)
-- `[branch]`: branchName (feat-my-feature) `/`, `.`, `_` are replaced to `-`
+These helpers are available:
+
+- `[YYYY]` - Full year (i.e. 2021)
+- `[YY]` - Short year (i.e. 21)
+- `[MM]` - Month (i.e. 05)
+- `[DD]` - Day (i.e. 09)
+- `[hh]` - Hours (i.e. 03)
+- `[mm]` - Minutes (i.e. 00)
+- `[ss]` - Seconds (i.e. 50)
+- `[branch]` - BranchName (`/`, `.`, `_` are replaced to `-`)
 
 ### Examples
 
@@ -102,7 +101,7 @@ migrations_dir           | `string`  | No  | `migrations` | The directory to loo
   uses: contentful/contentful-migration-automation@1
   with:
     # delete_feature: true
-    # set_alias: false
+    # set_alias: true
     # master_pattern: "main-[YY]-[MM]-[DD]-[hh]-[mm]"
     # feature_pattern: "sandbox-[branch]"
     # version_field: versionCounter
