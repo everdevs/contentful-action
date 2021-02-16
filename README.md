@@ -101,6 +101,8 @@ migrations_dir           | `string`  | No  | `migrations` | The directory to loo
 
 ## Workflow
 
+dummy
+
 Please look at the [demo file](.github/workflows/main.yml).
 
 ```yml
