@@ -46,7 +46,7 @@ There are several options to allow customizing this action.
 
 You can define the `master_pattern` and `feature_pattern`.
 **Master** is used as alias target.
-**Feature** is used as a sandbox during development.
+**Feature** is used as a sandbox during development. XX This is not entirely clear. Are these environments? XX
 
 These helpers are available:
 
@@ -70,7 +70,7 @@ These helpers are available:
 
 > DANGER. Please make sure you know what you're doing when setting these to true.
 
-`delete_feature`: Will delete the feature once it has been merged. While this is considered safe, you might want to keep
+`delete_feature`: Will delete the feature XX what is 'the feature' a contentful environment? XX once it has been merged. While this is considered safe, you might want to keep
 the sandbox environment.
 
 `set_alias`: Will set the alias to the new master environment once the feature has been merged. You might want to
@@ -106,7 +106,7 @@ Please look at the [demo file](.github/workflows/main.yml).
 ```yml
 - name: Contentful Migration
   id: migrate
-  uses: contentful/contentful-migration-automation@@v2.0.0
+  uses: contentful/contentful-migration-automation@@v2.0.0 XX shouldn't this be changed to everdevs/... XX
   with:
     # delete_feature: true
     # set_alias: true
