@@ -34,6 +34,75 @@ export const Logger = {
 };
 
 /**
+ *
+ * @param {string} v
+ * @returns {string}
+ */
+export const getLabel = (v: string) => (/-(.*$)/.exec(v) ?? ["", ""])[1];
+
+/**
+ *
+ * @type {string[]}
+ */
+export const ratings = ["alpha", "beta", "rc", ""];
+
+/**
+ *
+ * @param {string} s
+ * @returns {number}
+ */
+export const getRatingWeight = (s: string) => ratings.indexOf(s);
+
+/**
+ *
+ * @param arr
+ */
+export const sortSemver = (arr: string[]): string[] => {
+  return arr.sort((a, b) => {
+    const cleanA = a.replace(/-.*$/, "");
+    const cleanB = b.replace(/-.*$/, "");
+    const [aMaj, aMin = "0", aPat = "0"] = cleanA.split(".").map((v) => parseInt(v, 10));
+    const [bMaj, bMin = "0", bPat = "0"] = cleanB.split(".").map((v) => parseInt(v, 10));
+    if (aMaj > bMaj) {
+      return 1;
+    }
+    if (bMaj > aMaj) {
+      return -1;
+    }
+    if (aMin > bMin) {
+      return 1;
+    }
+    if (bMin > aMin) {
+      return -1;
+    }
+    if (aPat > bPat) {
+      return 1;
+    }
+    if (bPat > aPat) {
+      return -1;
+    }
+    const labelA = getLabel(a);
+    const labelB = getLabel(b);
+    const [labelAName = "", labelAVersion = "0"] = labelA.split(".");
+    const [labelBName = "", labelBVersion = "0"] = labelB.split(".");
+
+    if (getRatingWeight(labelAName) > getRatingWeight(labelBName)) {
+      return 1;
+    }
+    if (getRatingWeight(labelAName) < getRatingWeight(labelBName)) {
+      return -1;
+    }
+    if (parseInt(labelAVersion, 10) > parseInt(labelBVersion, 10)) {
+      return 1;
+    }
+    if (parseInt(labelAVersion, 10) < parseInt(labelBVersion, 10)) {
+      return -1;
+    }
+    return 0;
+  });
+};
+
+/**
  * Promise based delay
  * @param time
  */
@@ -43,18 +112,20 @@ export const delay = (time = DELAY): Promise<void> =>
 /**
  * Convert fileNames to integers
  * @example
- * filenameToVersion("1.js") // 1
+ * filenameToVersion("1.js") // "1"
+ * filenameToVersion("1.0.1.js") // "1.0.1"
  */
-export const filenameToVersion = (file: string): number =>
-  parseInt(file.replace(/\.js$/, "").replace(/_/g, "."), 10);
+export const filenameToVersion = (file: string): string =>
+  file.replace(/\.js$/, "").replace(/_/g, ".");
 
 /**
  * Convert integers to filenames
  * @example
- * versionToFilename(1) // 1.js
+ * versionToFilename("1") // "1.js"
+ * versionToFilename("1.0.1") // "1.0.1.js"
  */
 export const versionToFilename = (version: string): string =>
-  version.replace(/\./g, "_") + ".js";
+   `${version.replace(/\\./g, "_")}.js`;
 
 /**
  * Convert a branchName to a valid environmentName

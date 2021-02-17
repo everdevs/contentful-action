@@ -96193,6 +96193,70 @@ var Logger = {
     },
 };
 /**
+ *
+ * @param {string} v
+ * @returns {string}
+ */
+var getLabel = function (v) { var _a; return ((_a = /-(.*$)/.exec(v)) !== null && _a !== void 0 ? _a : ["", ""])[1]; };
+/**
+ *
+ * @type {string[]}
+ */
+var ratings = ["alpha", "beta", "rc", ""];
+/**
+ *
+ * @param {string} s
+ * @returns {number}
+ */
+var getRatingWeight = function (s) { return ratings.indexOf(s); };
+/**
+ *
+ * @param arr
+ */
+var sortSemver = function (arr) {
+    return arr.sort(function (a, b) {
+        var cleanA = a.replace(/-.*$/, "");
+        var cleanB = b.replace(/-.*$/, "");
+        var _a = cleanA.split(".").map(function (v) { return parseInt(v, 10); }), aMaj = _a[0], _b = _a[1], aMin = _b === void 0 ? "0" : _b, _c = _a[2], aPat = _c === void 0 ? "0" : _c;
+        var _d = cleanB.split(".").map(function (v) { return parseInt(v, 10); }), bMaj = _d[0], _e = _d[1], bMin = _e === void 0 ? "0" : _e, _f = _d[2], bPat = _f === void 0 ? "0" : _f;
+        if (aMaj > bMaj) {
+            return 1;
+        }
+        if (bMaj > aMaj) {
+            return -1;
+        }
+        if (aMin > bMin) {
+            return 1;
+        }
+        if (bMin > aMin) {
+            return -1;
+        }
+        if (aPat > bPat) {
+            return 1;
+        }
+        if (bPat > aPat) {
+            return -1;
+        }
+        var labelA = getLabel(a);
+        var labelB = getLabel(b);
+        var _g = labelA.split("."), _h = _g[0], labelAName = _h === void 0 ? "" : _h, _j = _g[1], labelAVersion = _j === void 0 ? "0" : _j;
+        var _k = labelB.split("."), _l = _k[0], labelBName = _l === void 0 ? "" : _l, _m = _k[1], labelBVersion = _m === void 0 ? "0" : _m;
+        if (getRatingWeight(labelAName) > getRatingWeight(labelBName)) {
+            return 1;
+        }
+        if (getRatingWeight(labelAName) < getRatingWeight(labelBName)) {
+            return -1;
+        }
+        if (parseInt(labelAVersion, 10) > parseInt(labelBVersion, 10)) {
+            return 1;
+        }
+        if (parseInt(labelAVersion, 10) < parseInt(labelBVersion, 10)) {
+            return -1;
+        }
+        return 0;
+    });
+};
+/**
  * Promise based delay
  * @param time
  */
@@ -96203,18 +96267,20 @@ var delay = function (time) {
 /**
  * Convert fileNames to integers
  * @example
- * filenameToVersion("1.js") // 1
+ * filenameToVersion("1.js") // "1"
+ * filenameToVersion("1.0.1.js") // "1.0.1"
  */
 var filenameToVersion = function (file) {
-    return parseInt(file.replace(/\.js$/, "").replace(/_/g, "."), 10);
+    return file.replace(/\.js$/, "").replace(/_/g, ".");
 };
 /**
  * Convert integers to filenames
  * @example
- * versionToFilename(1) // 1.js
+ * versionToFilename("1") // "1.js"
+ * versionToFilename("1.0.1") // "1.0.1.js"
  */
 var versionToFilename = function (version) {
-    return version.replace(/\./g, "_") + ".js";
+    return version.replace(/\\./g, "_") + ".js";
 };
 /**
  * Convert a branchName to a valid environmentName
@@ -96389,23 +96455,23 @@ var readdirAsync = Object(external_util_.promisify)(external_fs_.readdir);
  * @param space
  */
 var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var branchNames, _a, environmentId, environment, environmentNames, count, status_1, newEnv, keys, defaultLocale, availableMigrations, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
-    var _b;
-    return Object(tslib.__generator)(this, function (_c) {
-        switch (_c.label) {
+    var branchNames, _a, environmentId, environment, environmentNames, count, status_1, newEnv, keys, defaultLocale, availableMigrations, _b, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
+    var _c;
+    return Object(tslib.__generator)(this, function (_d) {
+        switch (_d.label) {
             case 0:
                 branchNames = getBranchNames();
                 return [4 /*yield*/, getEnvironment(space, branchNames)];
             case 1:
-                _a = _c.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentNames = _a.environmentNames;
+                _a = _d.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentNames = _a.environmentNames;
                 count = 0;
                 Logger.log("Waiting for environment processing...");
-                _c.label = 2;
+                _d.label = 2;
             case 2:
                 if (!(count < MAX_NUMBER_OF_TRIES)) return [3 /*break*/, 5];
                 return [4 /*yield*/, space.getEnvironment(environment.sys.id)];
             case 3:
-                status_1 = (_c.sent()).sys.status
+                status_1 = (_d.sent()).sys.status
                     .sys.id;
                 if (status_1 === "ready") {
                     Logger.success("Successfully processed new environment: \"" + environmentId + "\"");
@@ -96417,7 +96483,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 }
                 return [4 /*yield*/, delay()];
             case 4:
-                _c.sent();
+                _d.sent();
                 count++;
                 return [3 /*break*/, 2];
             case 5:
@@ -96431,32 +96497,31 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 };
                 return [4 /*yield*/, space.getApiKeys()];
             case 6:
-                keys = (_c.sent()).items;
+                keys = (_d.sent()).items;
                 return [4 /*yield*/, Promise.all(keys.map(function (key) {
                         Logger.verbose("Updating: \"" + key.sys.id + "\"");
                         key.environments.push(newEnv);
                         return key.update();
                     }))];
             case 7:
-                _c.sent();
+                _d.sent();
                 Logger.verbose("Set default locale to new environment");
                 return [4 /*yield*/, environment.getLocales()];
             case 8:
-                defaultLocale = (_c.sent()).items.find(function (locale) { return locale.default; }).code;
+                defaultLocale = (_d.sent()).items.find(function (locale) { return locale.default; }).code;
                 Logger.verbose("Read all the available migrations from the file system");
+                _b = sortSemver;
                 return [4 /*yield*/, readdirAsync(MIGRATIONS_DIR)];
             case 9:
-                availableMigrations = (_c.sent())
-                    .filter(function (file) { return /^\d+?\.js$/.test(file); })
-                    .map(function (file) { return filenameToVersion(file); })
-                    .sort(function (a, b) { return a - b; })
-                    .map(function (num) { return "" + num; });
+                availableMigrations = _b.apply(void 0, [(_d.sent())
+                        .map(function (file) { return filenameToVersion(file); })]);
+                Logger.verbose("versionOrder: " + JSON.stringify(availableMigrations, null, 4));
                 Logger.verbose("Find current version of the contentful space");
                 return [4 /*yield*/, environment.getEntries({
                         content_type: VERSION_CONTENT_TYPE,
                     })];
             case 10:
-                versions = (_c.sent()).items;
+                versions = (_d.sent()).items;
                 // If there is no entry or more than one of CONTENTFUL_VERSION_TRACKING
                 // Then throw an Error and abort
                 if (versions.length === 0) {
@@ -96483,7 +96548,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 };
                 Logger.verbose("Run migrations and update version entry");
                 mutableStoredVersionEntry = storedVersionEntry;
-                _c.label = 11;
+                _d.label = 11;
             case 11:
                 if (!(migrationToRun = migrationsToRun.shift())) return [3 /*break*/, 15];
                 filePath = external_path_default().join(MIGRATIONS_DIR, versionToFilename(migrationToRun));
@@ -96492,15 +96557,15 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                         filePath: filePath,
                     }))];
             case 12:
-                _c.sent();
+                _d.sent();
                 Logger.success("Migration script " + migrationToRun + ".js succeeded");
                 mutableStoredVersionEntry.fields.version[defaultLocale] = migrationToRun;
                 return [4 /*yield*/, mutableStoredVersionEntry.update()];
             case 13:
-                mutableStoredVersionEntry = _c.sent();
+                mutableStoredVersionEntry = _d.sent();
                 return [4 /*yield*/, mutableStoredVersionEntry.publish()];
             case 14:
-                mutableStoredVersionEntry = _c.sent();
+                mutableStoredVersionEntry = _d.sent();
                 Logger.success("Updated field " + VERSION_FIELD + " in " + VERSION_CONTENT_TYPE + " entry to " + migrationToRun);
                 return [3 /*break*/, 11];
             case 15:
@@ -96517,32 +96582,32 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                         .then(function (alias) { return Logger.success("alias " + alias.sys.id + " updated."); })
                         .catch(Logger.error)];
             case 16:
-                _c.sent();
+                _d.sent();
                 return [3 /*break*/, 18];
             case 17:
                 Logger.verbose("Running on feature branch");
                 Logger.verbose("No alias changes required");
-                _c.label = 18;
+                _d.label = 18;
             case 18:
                 if (!(DELETE_FEATURE &&
-                    branchNames.baseRef === branchNames.defaultBranch && ((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged))) return [3 /*break*/, 23];
-                _c.label = 19;
+                    branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged))) return [3 /*break*/, 23];
+                _d.label = 19;
             case 19:
-                _c.trys.push([19, 22, , 23]);
+                _d.trys.push([19, 22, , 23]);
                 environmentIdToDelete = getNameFromPattern(FEATURE_PATTERN, {
                     branchName: branchNames.headRef,
                 });
                 Logger.log("Delete the environment: " + environmentIdToDelete);
                 return [4 /*yield*/, space.getEnvironment(environmentIdToDelete)];
             case 20:
-                environment_1 = _c.sent();
+                environment_1 = _d.sent();
                 return [4 /*yield*/, (environment_1 === null || environment_1 === void 0 ? void 0 : environment_1.delete())];
             case 21:
-                _c.sent();
+                _d.sent();
                 Logger.success("Deleted the environment: " + environmentIdToDelete);
                 return [3 /*break*/, 23];
             case 22:
-                error_1 = _c.sent();
+                error_1 = _d.sent();
                 Logger.error("Cannot delete the environment");
                 return [3 /*break*/, 23];
             case 23:

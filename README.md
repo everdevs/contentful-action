@@ -22,8 +22,12 @@ An action for automating contentful migrations.
 ## Usage
 
 This action runs migrations on your contentful space. Please add your migration scripts to a directory called
-`migrations` *(configurable)* and name them `[n].js` where `[n]` is the current version of your content-model.
-Versions are integers (`1.js`, `2.js`, ...)
+`migrations` *(configurable)* and name them `[version].js` where `[version]` is the current version of your content-model.
+Versions can be integers or [Semantic versions (semver)](https://semver.org/)  
+Example: `1.js`, `2.js`,`2.0.1-alpha.js`,`2.0.1-rc.js`,`2.0.1-rc.1.js`,`2.0.1-rc.2.js`, `2.0.1.js` ...  
+
+We recommend to not mix integers with semver but as long as they are unique it will work. `2` is the same version as 
+`2.0`and `2.0.0`, therefore it can cause errors if you have several versions that are considered the same.
 
 ![Screenshot of Contentful Version Tracking Entry](images/version-tracking.png)
 
