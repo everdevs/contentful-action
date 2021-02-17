@@ -8,28 +8,6 @@ export declare const Logger: {
     verbose(message: any): void;
 };
 /**
- *
- * @param {string} v
- * @returns {string}
- */
-export declare const getLabel: (v: string) => string;
-/**
- *
- * @type {string[]}
- */
-export declare const ratings: string[];
-/**
- *
- * @param {string} s
- * @returns {number}
- */
-export declare const getRatingWeight: (s: string) => number;
-/**
- *
- * @param arr
- */
-export declare const sortSemver: (arr: string[]) => string[];
-/**
  * Promise based delay
  * @param time
  */
