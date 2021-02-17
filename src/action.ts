@@ -22,7 +22,8 @@ import {
   getBranchNames,
   getEnvironment,
   getNameFromPattern,
-  Logger, sortSemver,
+  Logger,
+  sortSemver,
   versionToFilename,
 } from "./utils";
 
@@ -88,11 +89,13 @@ export const runAction = async (space): Promise<void> => {
   Logger.verbose("Read all the available migrations from the file system");
   // Check for available migrations
   // Migration scripts need to be sorted in order to run without conflicts
-  const availableMigrations = sortSemver((await readdirAsync(MIGRATIONS_DIR))
-    .map((file) => filenameToVersion(file)))
+  const availableMigrations = sortSemver(
+    (await readdirAsync(MIGRATIONS_DIR)).map((file) => filenameToVersion(file))
+  );
 
-  Logger.verbose(`versionOrder: ${JSON.stringify(availableMigrations, null, 4)}`);
-
+  Logger.verbose(
+    `versionOrder: ${JSON.stringify(availableMigrations, null, 4)}`
+  );
 
   Logger.verbose("Find current version of the contentful space");
   const { items: versions } = await environment.getEntries({
