@@ -19,8 +19,8 @@ jobs:
       id: migrate
       uses: ./
       with:
-        delete_feature: true
-        set_alias: false
+        delete_feature: false
+        set_alias: true
         master_pattern: "prod-[DD].[MM].[YYYY]-[hh][mm][ss]"
         feature_pattern: "sandbox-[branch]"
         version_field: version
