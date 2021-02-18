@@ -5,10 +5,15 @@ import {
   CONTENTFUL_ALIAS,
   DELAY,
   FEATURE_PATTERN,
-  MASTER_PATTERN,
   LOG_LEVEL,
+  MASTER_PATTERN,
 } from "./constants";
-import { BranchNames, EnvironmentProps, EventNames } from "./types";
+import {
+  BranchNames,
+  EnvironmentProps,
+  EventNames,
+  NameFromPatternArgs,
+} from "./types";
 
 // Force colors on github
 chalk.level = 3;
@@ -41,7 +46,7 @@ export const delay = (time = DELAY): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, time));
 
 /**
- * Convert fileNames to integers
+ * Convert fileNames to versions
  * @example
  * filenameToVersion("1.js") // "1"
  * filenameToVersion("1.0.1.js") // "1.0.1"
@@ -50,13 +55,13 @@ export const filenameToVersion = (file: string): string =>
   file.replace(/\.js$/, "").replace(/_/g, ".");
 
 /**
- * Convert integers to filenames
+ * Convert versions to filenames
  * @example
  * versionToFilename("1") // "1.js"
  * versionToFilename("1.0.1") // "1.0.1.js"
  */
 export const versionToFilename = (version: string): string =>
-   `${version.replace(/\\./g, "_")}.js`;
+  `${version.replace(/\\./g, "_")}.js`;
 
 /**
  * Convert a branchName to a valid environmentName
@@ -92,10 +97,6 @@ export const matchers = {
     branchNameToEnvironmentName(branchName),
 };
 
-export interface NameToPatternArgs {
-  branchName?: string;
-}
-
 /**
  *
  * @param pattern
@@ -103,7 +104,7 @@ export interface NameToPatternArgs {
  */
 export const getNameFromPattern = (
   pattern: string,
-  { branchName }: NameToPatternArgs = {}
+  { branchName }: NameFromPatternArgs = {}
 ): string => {
   const date = new Date();
   return pattern.replace(
@@ -175,9 +176,14 @@ export const getEnvironment = async (
   Logger.verbose(
     `MASTER_PATTERN: ${MASTER_PATTERN} | FEATURE_PATTERN: ${FEATURE_PATTERN}`
   );
-  const environmentId =
+  const environmentType =
     branchNames.baseRef === branchNames.defaultBranch &&
     github.context.payload.pull_request?.merged
+      ? CONTENTFUL_ALIAS
+      : "feature";
+
+  const environmentId =
+    environmentType === CONTENTFUL_ALIAS
       ? getNameFromPattern(MASTER_PATTERN)
       : getNameFromPattern(FEATURE_PATTERN, {
           branchName: branchNames.headRef,
@@ -186,8 +192,9 @@ export const getEnvironment = async (
 
   // If environment matches ${CONTENTFUL_ALIAS} ("master")
   // Then return it without further actions
-  if (environmentId === CONTENTFUL_ALIAS) {
+  if (environmentType === CONTENTFUL_ALIAS) {
     return {
+      environmentType,
       environmentNames,
       environmentId,
       environment: await space.getEnvironment(environmentId),
@@ -209,6 +216,7 @@ export const getEnvironment = async (
   Logger.log(`Creating environment ${environmentId}`);
 
   return {
+    environmentType,
     environmentNames,
     environmentId,
     environment: await space.createEnvironmentWithId(environmentId, {
