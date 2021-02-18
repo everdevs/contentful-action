@@ -11,8 +11,14 @@ export interface EnvironmentNames {
     base: string;
     head: string | null;
 }
+declare type EnvironmentType = "master" | "feature";
 export interface EnvironmentProps {
+    environmentType: EnvironmentType;
     environmentNames: EnvironmentNames;
     environmentId: string;
     environment: Environment;
 }
+export interface NameFromPatternArgs {
+    branchName?: string;
+}
+export {};

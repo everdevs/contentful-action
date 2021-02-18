@@ -36,7 +36,7 @@ export const readdirAsync = promisify(readdir);
  */
 export const runAction = async (space): Promise<void> => {
   const branchNames = getBranchNames();
-  const { environmentId, environment, environmentNames } = await getEnvironment(
+  const { environmentId, environment, environmentType } = await getEnvironment(
     space,
     branchNames
   );
@@ -169,10 +169,11 @@ export const runAction = async (space): Promise<void> => {
   }
 
   Logger.log(`Checking if we need to update ${CONTENTFUL_ALIAS} alias`);
-  // If the environmentId starts with ${CONTENTFUL_ALIAS} ("master")
+  // If the environmentType is ${CONTENTFUL_ALIAS} ("master")
   // Then set the alias to the new environment
   // Else inform the user
-  if (environmentId.startsWith(CONTENTFUL_ALIAS) && SET_ALIAS) {
+
+  if (environmentType === CONTENTFUL_ALIAS && SET_ALIAS) {
     Logger.log(`Running on ${CONTENTFUL_ALIAS}.`);
     Logger.log(`Updating ${CONTENTFUL_ALIAS} alias.`);
     await space

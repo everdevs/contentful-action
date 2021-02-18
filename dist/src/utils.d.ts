@@ -1,5 +1,5 @@
 import { Space } from "contentful-management/dist/typings/entities/space";
-import { BranchNames, EnvironmentProps } from "./types";
+import { BranchNames, EnvironmentProps, NameFromPatternArgs } from "./types";
 export declare const Logger: {
     log(message: any): void;
     success(message: any): void;
@@ -13,14 +13,14 @@ export declare const Logger: {
  */
 export declare const delay: (time?: number) => Promise<void>;
 /**
- * Convert fileNames to integers
+ * Convert fileNames to versions
  * @example
  * filenameToVersion("1.js") // "1"
  * filenameToVersion("1.0.1.js") // "1.0.1"
  */
 export declare const filenameToVersion: (file: string) => string;
 /**
- * Convert integers to filenames
+ * Convert versions to filenames
  * @example
  * versionToFilename("1") // "1.js"
  * versionToFilename("1.0.1") // "1.0.1.js"
@@ -51,15 +51,12 @@ export declare const matchers: {
     DD: (date: Date) => string;
     branch: (branchName: string) => string;
 };
-export interface NameToPatternArgs {
-    branchName?: string;
-}
 /**
  *
  * @param pattern
  * @param branchName
  */
-export declare const getNameFromPattern: (pattern: string, { branchName }?: NameToPatternArgs) => string;
+export declare const getNameFromPattern: (pattern: string, { branchName }?: NameFromPatternArgs) => string;
 /**
  * Get the branchNames based on the eventName
  */

@@ -98735,7 +98735,7 @@ var delay = function (time) {
     return new Promise(function (resolve) { return setTimeout(resolve, time); });
 };
 /**
- * Convert fileNames to integers
+ * Convert fileNames to versions
  * @example
  * filenameToVersion("1.js") // "1"
  * filenameToVersion("1.0.1.js") // "1.0.1"
@@ -98744,7 +98744,7 @@ var filenameToVersion = function (file) {
     return file.replace(/\.js$/, "").replace(/_/g, ".");
 };
 /**
- * Convert integers to filenames
+ * Convert versions to filenames
  * @example
  * versionToFilename("1") // "1.js"
  * versionToFilename("1.0.1") // "1.0.1.js"
@@ -98846,7 +98846,7 @@ var getBranchNames = function () {
  * @param branchNames
  */
 var getEnvironment = function (space, branchNames) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var environmentNames, environmentId, environment, e_1;
+    var environmentNames, environmentType, environmentId, environment, e_1;
     var _a, _b;
     var _c;
     return Object(tslib.__generator)(this, function (_d) {
@@ -98862,14 +98862,18 @@ var getEnvironment = function (space, branchNames) { return Object(tslib.__await
                 // Then create an environment name for the given master_pattern
                 // Else create an environment name for the given feature_pattern
                 Logger.verbose("MASTER_PATTERN: " + MASTER_PATTERN + " | FEATURE_PATTERN: " + FEATURE_PATTERN);
-                environmentId = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
+                environmentType = branchNames.baseRef === branchNames.defaultBranch && ((_c = github.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged)
+                    ? CONTENTFUL_ALIAS
+                    : "feature";
+                environmentId = environmentType === CONTENTFUL_ALIAS
                     ? getNameFromPattern(MASTER_PATTERN)
                     : getNameFromPattern(FEATURE_PATTERN, {
                         branchName: branchNames.headRef,
                     });
                 Logger.verbose("environmentId: \"" + environmentId + "\"");
-                if (!(environmentId === CONTENTFUL_ALIAS)) return [3 /*break*/, 2];
+                if (!(environmentType === CONTENTFUL_ALIAS)) return [3 /*break*/, 2];
                 _a = {
+                    environmentType: environmentType,
                     environmentNames: environmentNames,
                     environmentId: environmentId
                 };
@@ -98897,6 +98901,7 @@ var getEnvironment = function (space, branchNames) { return Object(tslib.__await
             case 7:
                 Logger.log("Creating environment " + environmentId);
                 _b = {
+                    environmentType: environmentType,
                     environmentNames: environmentNames,
                     environmentId: environmentId
                 };
@@ -98926,7 +98931,7 @@ var readdirAsync = Object(external_util_.promisify)(external_fs_.readdir);
  * @param space
  */
 var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0, void 0, function () {
-    var branchNames, _a, environmentId, environment, environmentNames, count, status_1, newEnv, keys, defaultLocale, availableMigrations, _b, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
+    var branchNames, _a, environmentId, environment, environmentType, count, status_1, newEnv, keys, defaultLocale, availableMigrations, _b, versions, storedVersionEntry, currentVersionString, currentMigrationIndex, migrationsToRun, migrationOptions, migrationToRun, mutableStoredVersionEntry, filePath, environmentIdToDelete, environment_1, error_1;
     var _c;
     return Object(tslib.__generator)(this, function (_d) {
         switch (_d.label) {
@@ -98934,7 +98939,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 branchNames = getBranchNames();
                 return [4 /*yield*/, getEnvironment(space, branchNames)];
             case 1:
-                _a = _d.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentNames = _a.environmentNames;
+                _a = _d.sent(), environmentId = _a.environmentId, environment = _a.environment, environmentType = _a.environmentType;
                 count = 0;
                 Logger.log("Waiting for environment processing...");
                 _d.label = 2;
@@ -99040,7 +99045,7 @@ var runAction = function (space) { return Object(tslib.__awaiter)(void 0, void 0
                 return [3 /*break*/, 11];
             case 15:
                 Logger.log("Checking if we need to update " + CONTENTFUL_ALIAS + " alias");
-                if (!(environmentId.startsWith(CONTENTFUL_ALIAS) && SET_ALIAS)) return [3 /*break*/, 17];
+                if (!(environmentType === CONTENTFUL_ALIAS && SET_ALIAS)) return [3 /*break*/, 17];
                 Logger.log("Running on " + CONTENTFUL_ALIAS + ".");
                 Logger.log("Updating " + CONTENTFUL_ALIAS + " alias.");
                 return [4 /*yield*/, space
